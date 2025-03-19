@@ -33,7 +33,6 @@
             button2 = new Button();
             button3 = new Button();
             button4 = new Button();
-            btnSave = new Button();
             label1 = new Label();
             txtPresetName = new TextBox();
             label3 = new Label();
@@ -62,7 +61,7 @@
             button1.Name = "button1";
             button1.Size = new Size(136, 23);
             button1.TabIndex = 1;
-            button1.Text = "Add";
+            button1.Text = "Add/Save";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
@@ -74,6 +73,7 @@
             button2.TabIndex = 2;
             button2.Text = "Edit";
             button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
             // 
             // button3
             // 
@@ -83,6 +83,7 @@
             button3.TabIndex = 3;
             button3.Text = "Delete";
             button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
             // 
             // button4
             // 
@@ -94,18 +95,6 @@
             button4.Text = "Connect";
             button4.UseVisualStyleBackColor = true;
             button4.Click += button4_Click;
-            // 
-            // btnSave
-            // 
-            btnSave.AccessibleName = "btnSave";
-            btnSave.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnSave.Location = new Point(138, 295);
-            btnSave.Name = "btnSave";
-            btnSave.Size = new Size(168, 44);
-            btnSave.TabIndex = 5;
-            btnSave.Text = "Save";
-            btnSave.UseVisualStyleBackColor = true;
-            btnSave.Click += button5_Click;
             // 
             // label1
             // 
@@ -200,7 +189,6 @@
             Controls.Add(label3);
             Controls.Add(txtPresetName);
             Controls.Add(label1);
-            Controls.Add(btnSave);
             Controls.Add(button4);
             Controls.Add(button3);
             Controls.Add(button2);
@@ -219,7 +207,6 @@
         private Button button2;
         private Button button3;
         private Button button4;
-        private Button btnSave;
         private Label label1;
         private TextBox txtPresetName;
         private Label label3;
