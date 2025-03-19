@@ -49,15 +49,33 @@ namespace OrchestratorConnector
             var option_clientid = txtClientID.Text;
             var option_clientsecret = txtClientSecret.Text;
 
-            var listItem = new ListViewItem(presetName);
-            listItem.Tag = new PresetOptions
-            {
-                Option1 = option_orchurl,
-                Option2 = option_clientid,
-                Option3 = option_clientsecret
-            };
+            // Check if an item with the same name already exists
+            var existingItem = listBox1.Items.Cast<ListViewItem>().FirstOrDefault(item => item.Text == presetName);
 
-            listBox1.Items.Add(listItem);
+            if (existingItem != null)
+            {
+                // Overwrite the existing item
+                existingItem.Tag = new PresetOptions
+                {
+                    Option1 = option_orchurl,
+                    Option2 = option_clientid,
+                    Option3 = option_clientsecret
+                };
+            }
+            else
+            {
+                // Add a new item
+                var listItem = new ListViewItem(presetName);
+                listItem.Tag = new PresetOptions
+                {
+                    Option1 = option_orchurl,
+                    Option2 = option_clientid,
+                    Option3 = option_clientsecret
+                };
+
+                listBox1.Items.Add(listItem);
+            }
+
             listBox1.DisplayMember = "Text"; // Ensure the DisplayMember is set
             listBox1.Refresh(); // Refresh the listbox to reflect the new item
 
