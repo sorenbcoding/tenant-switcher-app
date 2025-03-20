@@ -17,7 +17,7 @@ namespace OrchestratorConnector
             InitializeComponent();
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void buttonConnect_Click(object sender, EventArgs e)
         {
 
         }
@@ -32,7 +32,7 @@ namespace OrchestratorConnector
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonAddSave_Click(object sender, EventArgs e)
         {
             var presetName = txtPresetName.Text;
             var option_orchurl = txtOrchURL.Text;
@@ -76,7 +76,7 @@ namespace OrchestratorConnector
             txtClientSecret.Clear();
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void buttonDelete_Click(object sender, EventArgs e)
         {
             if (listBox1.SelectedItem != null)
             {
@@ -90,7 +90,7 @@ namespace OrchestratorConnector
             txtClientSecret.Clear();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void buttonEdit_Click(object sender, EventArgs e)
         {
             if (listBox1.SelectedItem != null)
             {
