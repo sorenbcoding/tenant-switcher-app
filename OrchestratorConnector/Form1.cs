@@ -94,21 +94,26 @@ namespace OrchestratorConnector
         {
             if (listBox1.SelectedItem != null)
             {
-                var selectedItem = (ListViewItem)listBox1.SelectedItem;
-                var presetOptions = (PresetOptions)selectedItem.Tag;
-
-                txtPresetName.Text = selectedItem.Text;
-                txtOrchURL.Text = presetOptions.Option1;
-                txtClientID.Text = presetOptions.Option2;
-                txtClientSecret.Text = presetOptions.Option3;
+                var selectedItem = listBox1.SelectedItem as ListViewItem;
+                if (selectedItem != null)
+                {
+                    var presetOptions = selectedItem.Tag as PresetOptions;
+                    if (presetOptions != null)
+                    {
+                        txtPresetName.Text = selectedItem.Text;
+                        txtOrchURL.Text = presetOptions.Option1;
+                        txtClientID.Text = presetOptions.Option2;
+                        txtClientSecret.Text = presetOptions.Option3;
+                    }
+                }
             }
         }
     }
 
     public class PresetOptions
     {
-        public string Option1 { get; set; }
-        public string Option2 { get; set; }
-        public string Option3 { get; set; }
+        public string Option1 { get; set; } = string.Empty;
+        public string Option2 { get; set; } = string.Empty;
+        public string Option3 { get; set; } = string.Empty;
     }
 }
