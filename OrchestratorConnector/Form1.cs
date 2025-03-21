@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,9 +13,12 @@ namespace OrchestratorConnector
 {
     public partial class Form1 : Form
     {
+        private const string PresetsFilePath = "presets.json";
+
         public Form1()
         {
             InitializeComponent();
+            LoadPresets();
         }
 
         private void buttonConnect_Click(object sender, EventArgs e)
@@ -22,12 +26,12 @@ namespace OrchestratorConnector
 
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void txtPresetName_TextChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void listPresets_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
@@ -74,6 +78,8 @@ namespace OrchestratorConnector
             txtOrchURL.Clear();
             txtClientID.Clear();
             txtClientSecret.Clear();
+
+            SavePresets();
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
@@ -88,6 +94,8 @@ namespace OrchestratorConnector
             txtOrchURL.Clear();
             txtClientID.Clear();
             txtClientSecret.Clear();
+
+            SavePresets();
         }
 
         private void buttonEdit_Click(object sender, EventArgs e)
@@ -108,6 +116,48 @@ namespace OrchestratorConnector
                 }
             }
         }
+
+        private void SavePresets()
+        {
+            var presets = listBox1.Items.Cast<ListViewItem>().Select(item =>
+            {
+                var options = item.Tag as PresetOptions;
+                return new PresetOptions
+                {
+                    Option1 = options != null ? options.Option1 : string.Empty,
+                    Option2 = options != null ? options.Option2 : string.Empty,
+                    Option3 = options != null ? options.Option3 : string.Empty,
+                    PresetName = item.Text
+                };
+            }).ToList();
+
+            var json = JsonSerializer.Serialize(presets);
+            File.WriteAllText(PresetsFilePath, json);
+        }
+
+        private void LoadPresets()
+        {
+            if (File.Exists(PresetsFilePath))
+            {
+                var json = File.ReadAllText(PresetsFilePath);
+                var presets = JsonSerializer.Deserialize<List<PresetOptions>>(json);
+
+                if (presets != null)
+                {
+                    foreach (var preset in presets)
+                    {
+                        var listItem = new ListViewItem(preset.PresetName)
+                        {
+                            Tag = preset,
+                            Text = preset.PresetName // Ensure the Text property is set correctly
+                        };
+                        listBox1.Items.Add(listItem);
+                    }
+                }
+            }
+
+            listBox1.DisplayMember = "Text"; // Ensure the DisplayMember is set
+        }
     }
 
     public class PresetOptions
@@ -115,5 +165,6 @@ namespace OrchestratorConnector
         public string Option1 { get; set; } = string.Empty;
         public string Option2 { get; set; } = string.Empty;
         public string Option3 { get; set; } = string.Empty;
+        public string PresetName { get; set; } = string.Empty;
     }
 }

@@ -53,7 +53,7 @@
             listBox1.Name = "listBox1";
             listBox1.Size = new Size(354, 424);
             listBox1.TabIndex = 0;
-            listBox1.SelectedIndexChanged += listBox1_SelectedIndexChanged;
+            listBox1.SelectedIndexChanged += listPresets_SelectedIndexChanged;
             // 
             // button1
             // 
@@ -112,7 +112,7 @@
             txtPresetName.Name = "txtPresetName";
             txtPresetName.Size = new Size(420, 23);
             txtPresetName.TabIndex = 7;
-            txtPresetName.TextChanged += textBox1_TextChanged;
+            txtPresetName.TextChanged += txtPresetName_TextChanged;
             // 
             // label3
             // 
