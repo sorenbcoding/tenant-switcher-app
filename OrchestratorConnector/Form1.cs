@@ -23,6 +23,12 @@ namespace OrchestratorConnector
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
+            var processName = "UiPath.Assistant";
+            var processes = System.Diagnostics.Process.GetProcessesByName(processName);
+            foreach (var process in processes)
+            {
+                process.Kill();
+            }
 
         }
 
@@ -55,6 +61,9 @@ namespace OrchestratorConnector
                     Option2 = option_clientid,
                     Option3 = option_clientsecret
                 };
+                // Update status strip
+                toolStripStatusLabel1.Text = "Entry saved!";
+                statusStrip1.Refresh();
             }
             else
             {
@@ -68,6 +77,9 @@ namespace OrchestratorConnector
                 };
 
                 listBox1.Items.Add(listItem);
+                // Update status strip
+                toolStripStatusLabel1.Text = "Entry successfully added!";
+                statusStrip1.Refresh();
             }
 
             listBox1.DisplayMember = "Text"; // Ensure the DisplayMember is set
@@ -157,6 +169,11 @@ namespace OrchestratorConnector
             }
 
             listBox1.DisplayMember = "Text"; // Ensure the DisplayMember is set
+        }
+
+        private void toolStripStatusLabel1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

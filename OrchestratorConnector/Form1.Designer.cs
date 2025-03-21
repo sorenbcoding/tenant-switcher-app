@@ -42,6 +42,9 @@
             txtClientID = new TextBox();
             label5 = new Label();
             txtClientSecret = new TextBox();
+            statusStrip1 = new StatusStrip();
+            toolStripStatusLabel1 = new ToolStripStatusLabel();
+            statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // listBox1
@@ -49,9 +52,9 @@
             listBox1.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             listBox1.FormattingEnabled = true;
             listBox1.ItemHeight = 30;
-            listBox1.Location = new Point(471, 12);
+            listBox1.Location = new Point(471, 54);
             listBox1.Name = "listBox1";
-            listBox1.Size = new Size(317, 424);
+            listBox1.Size = new Size(317, 364);
             listBox1.TabIndex = 0;
             listBox1.SelectedIndexChanged += listPresets_SelectedIndexChanged;
             // 
@@ -91,7 +94,7 @@
             // button4
             // 
             button4.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            button4.Location = new Point(138, 379);
+            button4.Location = new Point(139, 347);
             button4.Name = "button4";
             button4.Size = new Size(168, 57);
             button4.TabIndex = 4;
@@ -179,11 +182,27 @@
             txtClientSecret.Size = new Size(420, 23);
             txtClientSecret.TabIndex = 15;
             // 
+            // statusStrip1
+            // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
+            statusStrip1.Location = new Point(0, 428);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(800, 22);
+            statusStrip1.TabIndex = 16;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new Size(0, 17);
+            toolStripStatusLabel1.Click += toolStripStatusLabel1_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(statusStrip1);
             Controls.Add(txtClientSecret);
             Controls.Add(label5);
             Controls.Add(txtClientID);
@@ -200,6 +219,8 @@
             Controls.Add(listBox1);
             Name = "Form1";
             Text = "Orchestrator Connector";
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -220,5 +241,7 @@
         private TextBox txtClientID;
         private Label label5;
         private TextBox txtClientSecret;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel toolStripStatusLabel1;
     }
 }
