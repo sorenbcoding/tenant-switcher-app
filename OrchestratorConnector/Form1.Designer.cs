@@ -49,17 +49,18 @@
             listBox1.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             listBox1.FormattingEnabled = true;
             listBox1.ItemHeight = 30;
-            listBox1.Location = new Point(434, 12);
+            listBox1.Location = new Point(471, 12);
             listBox1.Name = "listBox1";
-            listBox1.Size = new Size(354, 424);
+            listBox1.Size = new Size(317, 424);
             listBox1.TabIndex = 0;
             listBox1.SelectedIndexChanged += listPresets_SelectedIndexChanged;
             // 
             // button1
             // 
-            button1.Location = new Point(8, 52);
+            button1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button1.Location = new Point(34, 54);
             button1.Name = "button1";
-            button1.Size = new Size(136, 23);
+            button1.Size = new Size(110, 39);
             button1.TabIndex = 1;
             button1.Text = "Add/Save";
             button1.UseVisualStyleBackColor = true;
@@ -67,9 +68,10 @@
             // 
             // button2
             // 
-            button2.Location = new Point(150, 52);
+            button2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button2.Location = new Point(150, 54);
             button2.Name = "button2";
-            button2.Size = new Size(136, 23);
+            button2.Size = new Size(110, 39);
             button2.TabIndex = 2;
             button2.Text = "Edit";
             button2.UseVisualStyleBackColor = true;
@@ -77,9 +79,10 @@
             // 
             // button3
             // 
-            button3.Location = new Point(292, 52);
+            button3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button3.Location = new Point(266, 54);
             button3.Name = "button3";
-            button3.Size = new Size(136, 23);
+            button3.Size = new Size(110, 39);
             button3.TabIndex = 3;
             button3.Text = "Delete";
             button3.UseVisualStyleBackColor = true;
@@ -99,16 +102,17 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.ForeColor = Color.FromArgb(255, 128, 0);
             label1.Location = new Point(4, 12);
             label1.Name = "label1";
-            label1.Size = new Size(110, 37);
+            label1.Size = new Size(412, 32);
             label1.TabIndex = 6;
-            label1.Text = "Presets";
+            label1.Text = "UiPath Orchestrator Tenant Presets";
             // 
             // txtPresetName
             // 
-            txtPresetName.Location = new Point(8, 116);
+            txtPresetName.Location = new Point(8, 140);
             txtPresetName.Name = "txtPresetName";
             txtPresetName.Size = new Size(420, 23);
             txtPresetName.TabIndex = 7;
@@ -118,25 +122,25 @@
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.Location = new Point(8, 92);
+            label3.Location = new Point(8, 116);
             label3.Name = "label3";
-            label3.Size = new Size(107, 21);
+            label3.Size = new Size(111, 21);
             label3.TabIndex = 9;
-            label3.Text = "Preset Name";
+            label3.Text = "Preset Name:";
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(8, 142);
+            label2.Location = new Point(8, 166);
             label2.Name = "label2";
-            label2.Size = new Size(139, 21);
+            label2.Size = new Size(143, 21);
             label2.TabIndex = 10;
-            label2.Text = "Orchestrator URL";
+            label2.Text = "Orchestrator URL:";
             // 
             // txtOrchURL
             // 
-            txtOrchURL.Location = new Point(8, 166);
+            txtOrchURL.Location = new Point(8, 190);
             txtOrchURL.Name = "txtOrchURL";
             txtOrchURL.Size = new Size(420, 23);
             txtOrchURL.TabIndex = 11;
@@ -145,15 +149,15 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label4.Location = new Point(8, 192);
+            label4.Location = new Point(8, 216);
             label4.Name = "label4";
-            label4.Size = new Size(149, 21);
+            label4.Size = new Size(153, 21);
             label4.TabIndex = 12;
-            label4.Text = "Client/Machine ID";
+            label4.Text = "Client/Machine ID:";
             // 
             // txtClientID
             // 
-            txtClientID.Location = new Point(8, 216);
+            txtClientID.Location = new Point(8, 240);
             txtClientID.Name = "txtClientID";
             txtClientID.Size = new Size(420, 23);
             txtClientID.TabIndex = 13;
@@ -162,15 +166,15 @@
             // 
             label5.AutoSize = true;
             label5.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label5.Location = new Point(8, 242);
+            label5.Location = new Point(8, 266);
             label5.Name = "label5";
-            label5.Size = new Size(106, 21);
+            label5.Size = new Size(110, 21);
             label5.TabIndex = 14;
-            label5.Text = "Client Secret";
+            label5.Text = "Client Secret:";
             // 
             // txtClientSecret
             // 
-            txtClientSecret.Location = new Point(8, 266);
+            txtClientSecret.Location = new Point(8, 290);
             txtClientSecret.Name = "txtClientSecret";
             txtClientSecret.Size = new Size(420, 23);
             txtClientSecret.TabIndex = 15;
@@ -195,7 +199,7 @@
             Controls.Add(button1);
             Controls.Add(listBox1);
             Name = "Form1";
-            Text = "Form1";
+            Text = "Orchestrator Connector";
             ResumeLayout(false);
             PerformLayout();
         }
