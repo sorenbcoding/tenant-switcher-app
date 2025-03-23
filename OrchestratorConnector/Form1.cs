@@ -23,6 +23,9 @@ namespace OrchestratorConnector
 
         private async void buttonConnect_Click(object sender, EventArgs e)
         {
+            toolStripStatusLabel1.Text = string.Empty;
+            statusStrip1.Refresh();
+
             // Kill running Assistant
             var processName = "UiPath.Assistant";
             var processes = System.Diagnostics.Process.GetProcessesByName(processName);
@@ -68,6 +71,9 @@ namespace OrchestratorConnector
                 UseShellExecute = false
             };
             System.Diagnostics.Process.Start(startInfo3);
+
+            toolStripStatusLabel1.Text = "Done!";
+            statusStrip1.Refresh();
         }
 
         private void txtPresetName_TextChanged(object sender, EventArgs e)
