@@ -15,7 +15,8 @@
     <Authors>Søren Schytz Birk</Authors>
     <PublishSingleFile>true</PublishSingleFile>
     <ApplicationIcon>globe-network-color-icon.ico</ApplicationIcon>
-    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <AssemblyName>Orchestrator Connector</AssemblyName>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
