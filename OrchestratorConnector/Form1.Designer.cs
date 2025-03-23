@@ -107,11 +107,11 @@
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.FromArgb(255, 128, 0);
-            label1.Location = new Point(4, 12);
+            label1.Location = new Point(8, 9);
             label1.Name = "label1";
-            label1.Size = new Size(412, 32);
+            label1.Size = new Size(331, 32);
             label1.TabIndex = 6;
-            label1.Text = "UiPath Orchestrator Tenant Presets";
+            label1.Text = "Orchestrator Tenant Presets";
             // 
             // txtPresetName
             // 

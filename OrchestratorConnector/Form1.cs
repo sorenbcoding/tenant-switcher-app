@@ -21,7 +21,7 @@ namespace OrchestratorConnector
             LoadPresets();
         }
 
-        private void buttonConnect_Click(object sender, EventArgs e)
+        private async void buttonConnect_Click(object sender, EventArgs e)
         {
             var processName = "UiPath.Assistant";
             var processes = System.Diagnostics.Process.GetProcessesByName(processName);
@@ -30,6 +30,35 @@ namespace OrchestratorConnector
                 process.Kill();
             }
 
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = @"C:\Program Files\UiPath\Studio\UiRobot.exe",
+                Arguments = "--disconnect",
+                UseShellExecute = false
+            };
+            System.Diagnostics.Process.Start(startInfo);
+
+            var selectedPreset = listBox1.SelectedItem as ListViewItem;
+            if (selectedPreset != null)
+            {
+                var presetOptions = selectedPreset.Tag as PresetOptions;
+                if (presetOptions != null)
+                {
+                    var orchUrl = presetOptions.Option1;
+                    var clientId = presetOptions.Option2;
+                    var clientSecret = presetOptions.Option3;
+                    var startInfo2 = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = @"C:\Program Files\UiPath\Studio\UiRobot.exe",
+                        Arguments = $"--connect -url {orchUrl} -clientid {clientId} -clientsecret {clientSecret}",
+                        UseShellExecute = false
+                    };
+                    System.Diagnostics.Process.Start(startInfo2);
+                }
+            }
+            await Task.Delay(5000); // Delay for 5 seconds
+
+            var processes2 = System.Diagnostics.Process.GetProcessesByName(processName);
         }
 
         private void txtPresetName_TextChanged(object sender, EventArgs e)
@@ -54,20 +83,19 @@ namespace OrchestratorConnector
 
             if (existingItem != null)
             {
-                // Overwrite the existing item
+                // Overwrite the existing entry
                 existingItem.Tag = new PresetOptions
                 {
                     Option1 = option_orchurl,
                     Option2 = option_clientid,
                     Option3 = option_clientsecret
                 };
-                // Update status strip
                 toolStripStatusLabel1.Text = "Entry saved!";
                 statusStrip1.Refresh();
             }
             else
             {
-                // Add a new item
+                // Add a new entry
                 var listItem = new ListViewItem(presetName);
                 listItem.Tag = new PresetOptions
                 {
@@ -77,15 +105,13 @@ namespace OrchestratorConnector
                 };
 
                 listBox1.Items.Add(listItem);
-                // Update status strip
                 toolStripStatusLabel1.Text = "Entry successfully added!";
                 statusStrip1.Refresh();
             }
 
-            listBox1.DisplayMember = "Text"; // Ensure the DisplayMember is set
-            listBox1.Refresh(); // Refresh the listbox to reflect the new item
+            listBox1.DisplayMember = "Text";
+            listBox1.Refresh();
 
-            // Clear the textboxes
             txtPresetName.Clear();
             txtOrchURL.Clear();
             txtClientID.Clear();
@@ -101,7 +127,6 @@ namespace OrchestratorConnector
                 listBox1.Items.Remove(listBox1.SelectedItem);
             }
 
-            // Clear the textboxes
             txtPresetName.Clear();
             txtOrchURL.Clear();
             txtClientID.Clear();
@@ -161,14 +186,14 @@ namespace OrchestratorConnector
                         var listItem = new ListViewItem(preset.PresetName)
                         {
                             Tag = preset,
-                            Text = preset.PresetName // Ensure the Text property is set correctly
+                            Text = preset.PresetName
                         };
                         listBox1.Items.Add(listItem);
                     }
                 }
             }
 
-            listBox1.DisplayMember = "Text"; // Ensure the DisplayMember is set
+            listBox1.DisplayMember = "Text";
         }
 
         private void toolStripStatusLabel1_Click(object sender, EventArgs e)
