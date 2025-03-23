@@ -6,6 +6,20 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Title>Orchestrator Connector</Title>
+    <Description>Program for quickly switching between several Orchestrator Tenants.</Description>
+    <Copyright>Søren Schytz Birk</Copyright>
+    <RepositoryUrl>https://github.com/sorenbcoding/OrchestratorConnector</RepositoryUrl>
+    <PackageReleaseNotes>Program for quickly switching between several Orchestrator Tenants.</PackageReleaseNotes>
+    <PackageIcon>globe-network-color-icon.png</PackageIcon>
+    <Authors>Søren Schytz Birk</Authors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\Desktop\globe-network-color-icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
