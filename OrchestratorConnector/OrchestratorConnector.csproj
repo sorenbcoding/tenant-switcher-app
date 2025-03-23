@@ -13,7 +13,14 @@
     <PackageReleaseNotes>Program for quickly switching between several Orchestrator Tenants.</PackageReleaseNotes>
     <PackageIcon>globe-network-color-icon.png</PackageIcon>
     <Authors>Søren Schytz Birk</Authors>
+    <PublishSingleFile>true</PublishSingleFile>
+    <ApplicationIcon>globe-network-color-icon.ico</ApplicationIcon>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="globe-network-color-icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\..\..\Desktop\globe-network-color-icon.png">
