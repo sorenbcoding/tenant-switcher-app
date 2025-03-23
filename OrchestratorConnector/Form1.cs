@@ -23,6 +23,7 @@ namespace OrchestratorConnector
 
         private async void buttonConnect_Click(object sender, EventArgs e)
         {
+            // Kill running Assistant
             var processName = "UiPath.Assistant";
             var processes = System.Diagnostics.Process.GetProcessesByName(processName);
             foreach (var process in processes)
@@ -30,6 +31,7 @@ namespace OrchestratorConnector
                 process.Kill();
             }
 
+            // Run UiRobot with --disconnect parameter
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = @"C:\Program Files\UiPath\Studio\UiRobot.exe",
@@ -38,6 +40,7 @@ namespace OrchestratorConnector
             };
             System.Diagnostics.Process.Start(startInfo);
 
+            // Run UiRobot with --connect parameter, options based on selected item
             var selectedPreset = listBox1.SelectedItem as ListViewItem;
             if (selectedPreset != null)
             {
@@ -58,7 +61,13 @@ namespace OrchestratorConnector
             }
             await Task.Delay(5000); // Delay for 5 seconds
 
-            var processes2 = System.Diagnostics.Process.GetProcessesByName(processName);
+            // Run UiPath Assistant
+            var startInfo3 = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = @"C:\Program Files\UiPath\Studio\UiPathAssistant\UiPath.Assistant.exe",
+                UseShellExecute = false
+            };
+            System.Diagnostics.Process.Start(startInfo3);
         }
 
         private void txtPresetName_TextChanged(object sender, EventArgs e)
@@ -122,6 +131,7 @@ namespace OrchestratorConnector
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
+            // Remove the selected item
             if (listBox1.SelectedItem != null)
             {
                 listBox1.Items.Remove(listBox1.SelectedItem);
@@ -137,6 +147,7 @@ namespace OrchestratorConnector
 
         private void buttonEdit_Click(object sender, EventArgs e)
         {
+            // Edit the selected item
             if (listBox1.SelectedItem != null)
             {
                 var selectedItem = listBox1.SelectedItem as ListViewItem;
