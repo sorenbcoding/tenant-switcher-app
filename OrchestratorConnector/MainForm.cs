@@ -8,14 +8,15 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.ServiceProcess;
 
 namespace OrchestratorConnector
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private const string PresetsFilePath = "presets.json";
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             LoadPresets();
@@ -23,7 +24,7 @@ namespace OrchestratorConnector
 
         private async void buttonConnect_Click(object sender, EventArgs e)
         {
-            toolStripStatusLabel1.Text = string.Empty;
+            toolStripStatusLabel1.Text = "Shutting down UiPath Assistant...";
             statusStrip1.Refresh();
 
             // Kill running Assistant
@@ -42,6 +43,12 @@ namespace OrchestratorConnector
                 UseShellExecute = false
             };
             System.Diagnostics.Process.Start(startInfo);
+
+            // Delay for 2 seconds
+            await Task.Delay(2000);
+
+            toolStripStatusLabel1.Text = "Connecting to tenant...";
+            statusStrip1.Refresh();
 
             // Run UiRobot with --connect parameter, options based on selected item
             var selectedPreset = listBox1.SelectedItem as ListViewItem;
@@ -62,15 +69,38 @@ namespace OrchestratorConnector
                     System.Diagnostics.Process.Start(startInfo2);
                 }
             }
-            await Task.Delay(5000); // Delay for 5 seconds
+            // Delay for 2 seconds
+            await Task.Delay(2000);
+
+            toolStripStatusLabel1.Text = "Restarting UiRobot Service...";
+            statusStrip1.Refresh();
+
+            // Restart UiPath Robot service
+            var serviceName = "UiPath Robot";
+            using (var serviceController = new ServiceController(serviceName))
+            {
+                if (serviceController.Status != ServiceControllerStatus.Stopped)
+                {
+                    serviceController.Stop();
+                    serviceController.WaitForStatus(ServiceControllerStatus.Stopped);
+                }
+                serviceController.Start();
+                serviceController.WaitForStatus(ServiceControllerStatus.Running);
+            }
+
+            // Delay for 5 seconds
+            await Task.Delay(5000);
+
+            toolStripStatusLabel1.Text = "Starting UiPath Assistant...";
+            statusStrip1.Refresh();
 
             // Run UiPath Assistant
-            var startInfo3 = new System.Diagnostics.ProcessStartInfo
+            var startInfoAssistant = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = @"C:\Program Files\UiPath\Studio\UiPathAssistant\UiPath.Assistant.exe",
                 UseShellExecute = false
             };
-            System.Diagnostics.Process.Start(startInfo3);
+            System.Diagnostics.Process.Start(startInfoAssistant);
 
             toolStripStatusLabel1.Text = "Done!";
             statusStrip1.Refresh();

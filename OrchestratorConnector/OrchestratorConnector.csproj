@@ -16,7 +16,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <ApplicationIcon>globe-network-color-icon.ico</ApplicationIcon>
     <AssemblyName>Orchestrator Connector</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +28,10 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.3" />
   </ItemGroup>
 
 </Project>
