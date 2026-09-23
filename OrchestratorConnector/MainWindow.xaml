@@ -1,0 +1,107 @@
+<Window x:Class="OrchestratorConnector.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:OrchestratorConnector.Behaviors"
+        Title="Orchestrator Connector"
+        Height="580" Width="920" MinHeight="500" MinWidth="780"
+        Background="{StaticResource BackgroundBrush}"
+        Icon="/Assets/globe-network-color-icon.ico"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <Image Source="/Assets/globe-network-color-icon.ico" Width="36" Height="36" Margin="0,0,12,0" />
+            <StackPanel>
+                <TextBlock Text="Orchestrator Connector" Style="{StaticResource TitleTextStyle}" />
+                <TextBlock Text="Switch between UiPath Orchestrator tenants in one click." Style="{StaticResource SubtitleTextStyle}" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Body -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Preset details card -->
+            <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="Preset Details" Style="{StaticResource SectionHeaderTextStyle}" />
+
+                    <TextBlock Text="Preset Name" Style="{StaticResource FieldLabelStyle}" />
+                    <TextBox Text="{Binding EditPresetName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" />
+
+                    <TextBlock Text="Orchestrator URL" Style="{StaticResource FieldLabelStyle}" />
+                    <TextBox Text="{Binding EditOrchestratorUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" />
+
+                    <TextBlock Text="Client / Machine ID" Style="{StaticResource FieldLabelStyle}" />
+                    <TextBox Text="{Binding EditClientId, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" />
+
+                    <TextBlock Text="Client Secret" Style="{StaticResource FieldLabelStyle}" />
+                    <PasswordBox behaviors:PasswordBoxAssistant.BoundPassword="{Binding EditClientSecret, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource ModernPasswordBoxStyle}" />
+                    <TextBlock Text="Leave blank when editing to keep the currently stored secret."
+                               Style="{StaticResource SubtitleTextStyle}" FontSize="11" Margin="0,4,0,16" TextWrapping="Wrap" />
+
+                    <UniformGrid Rows="1" Columns="3">
+                        <Button Content="Add / Save" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,6,0" />
+                        <Button Content="Edit" Command="{Binding EditCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="6,0,6,0" />
+                        <Button Content="Delete" Command="{Binding DeleteCommand}" Style="{StaticResource DangerButtonStyle}" Margin="6,0,0,0" />
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Presets list + connect card -->
+            <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Tenant Presets" Style="{StaticResource SectionHeaderTextStyle}" />
+
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding Presets}"
+                             SelectedItem="{Binding SelectedPreset}"
+                             Style="{StaticResource ModernListBoxStyle}"
+                             ItemContainerStyle="{StaticResource ModernListBoxItemStyle}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding PresetName}" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{Binding OrchestratorUrl}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <Button Grid.Row="2" Content="Connect" Command="{Binding ConnectCommand}"
+                            Style="{StaticResource ConnectButtonStyle}" Margin="0,16,0,0"
+                            HorizontalAlignment="Stretch" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status bar -->
+        <Grid Grid.Row="2" Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Style="{StaticResource SubtitleTextStyle}" VerticalAlignment="Center" />
+            <ProgressBar Grid.Column="1" Width="120" Height="4" IsIndeterminate="True"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" />
+        </Grid>
+    </Grid>
+</Window>
