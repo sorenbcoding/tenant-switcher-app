@@ -12,6 +12,8 @@
     <RepositoryUrl>https://github.com/sorenbcoding/OrchestratorConnector</RepositoryUrl>
     <PackageReleaseNotes>Program for quickly switching between several Orchestrator Tenants.</PackageReleaseNotes>
     <Authors>Søren Schytz Birk</Authors>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <ApplicationIcon>Assets\globe-network-color-icon.ico</ApplicationIcon>
     <AssemblyName>Orchestrator Connector</AssemblyName>
