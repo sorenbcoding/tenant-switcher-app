@@ -1,0 +1,71 @@
+using System.IO;
+
+namespace OrchestratorConnector.Services;
+
+/// <summary>
+/// Locates UiRobot.exe / UiPath.Assistant.exe across the install locations that vary by
+/// UiPath version and per-machine-vs-per-user install, instead of a single hardcoded path.
+/// </summary>
+public static class UiPathLocator
+{
+    private static readonly string[] UiRobotRelativePaths =
+    {
+        @"UiPath\Studio\UiRobot.exe",
+        @"UiPath\Robot\UiRobot.exe",
+    };
+
+    private static readonly string[] AssistantRelativePaths =
+    {
+        @"UiPath\Studio\UiPathAssistant\UiPath.Assistant.exe",
+        @"UiPath\Robot\UiPathAssistant\UiPath.Assistant.exe",
+        @"UiPath\UiPathAssistant\UiPath.Assistant.exe",
+    };
+
+    public static string? FindUiRobotExe(string? userOverride = null) => Find(UiRobotRelativePaths, userOverride);
+
+    public static string? FindAssistantExe(string? userOverride = null) => Find(AssistantRelativePaths, userOverride);
+
+    private static string? Find(IEnumerable<string> relativeCandidates, string? userOverride)
+    {
+        if (!string.IsNullOrWhiteSpace(userOverride) && File.Exists(userOverride))
+        {
+            return userOverride;
+        }
+
+        foreach (var root in GetSearchRoots())
+        {
+            foreach (var relative in relativeCandidates)
+            {
+                var candidate = Path.Combine(root, relative);
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> GetSearchRoots()
+    {
+        var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+        if (!string.IsNullOrEmpty(programFiles))
+        {
+            yield return programFiles;
+        }
+
+        if (!string.IsNullOrEmpty(programFilesX86) && programFilesX86 != programFiles)
+        {
+            yield return programFilesX86;
+        }
+
+        if (!string.IsNullOrEmpty(localAppData))
+        {
+            yield return Path.Combine(localAppData, "Programs");
+        }
+    }
+}
