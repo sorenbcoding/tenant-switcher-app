@@ -32,8 +32,8 @@ public sealed class PresetStore
             return new List<Preset>();
         }
 
-        await using var stream = File.OpenRead(_filePath);
-        var presets = await JsonSerializer.DeserializeAsync<List<Preset>>(stream, cancellationToken: ct);
+        using var stream = File.OpenRead(_filePath);
+        var presets = await JsonSerializer.DeserializeAsync<List<Preset>>(stream, cancellationToken: ct).ConfigureAwait(false);
         return presets ?? new List<Preset>();
     }
 
@@ -45,9 +45,9 @@ public sealed class PresetStore
         var tempFilePath = _filePath + ".tmp";
         var options = new JsonSerializerOptions { WriteIndented = true };
 
-        await using (var stream = File.Create(tempFilePath))
+        using (var stream = File.Create(tempFilePath))
         {
-            await JsonSerializer.SerializeAsync(stream, presets.ToList(), options, ct);
+            await JsonSerializer.SerializeAsync(stream, presets.ToList(), options, ct).ConfigureAwait(false);
         }
 
         File.Move(tempFilePath, _filePath, overwrite: true);

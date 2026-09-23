@@ -6,16 +6,18 @@ namespace OrchestratorConnector;
 
 public partial class App : Application
 {
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
         var presetStore = new PresetStore();
-        MigrationService.TryMigrateLegacyPresets(AppContext.BaseDirectory, presetStore);
+        // Runs off the UI thread: blocking .GetAwaiter().GetResult() calls inside
+        // MigrationService would otherwise deadlock against the WPF dispatcher.
+        await Task.Run(() => MigrationService.TryMigrateLegacyPresets(AppContext.BaseDirectory, presetStore));
 
         var switcher = new OrchestratorSwitcher();
         var viewModel = new MainViewModel(presetStore, switcher);
-        viewModel.LoadAsync().GetAwaiter().GetResult();
+        await viewModel.LoadAsync();
 
         var window = new MainWindow { DataContext = viewModel };
         MainWindow = window;
