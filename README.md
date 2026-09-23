@@ -39,7 +39,15 @@ dotnet build OrchestratorConnector.sln
 ## Publishing a single-file executable
 
 ```
-dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
+dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release
+```
+
+Produces a single `Orchestrator Connector.exe` (a couple of MB) under `bin\Release\net8.0-windows\win-x64\publish\`. This build is framework-dependent: it requires the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) on the machine it runs on, but the file itself can be copied/moved anywhere.
+
+If you need a build with zero install requirements instead (fully self-contained, ~150 MB), publish with:
+
+```
+dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 
 ## Project structure
