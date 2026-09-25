@@ -39,7 +39,17 @@ dotnet build OrchestratorConnector.sln
 ## Publishing a single-file executable
 
 ```
-dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
+dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release -o publish
+```
+
+This produces exactly one file to distribute: **`publish\Orchestrator Connector.exe`** (a couple of MB, plus a `.pdb` you can ignore/delete). That's the file to copy/move — it's fully self-contained as far as the app itself is concerned, needing only the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) installed on the machine it runs on.
+
+> **Don't** grab the exe from `bin\Release\net8.0-windows\win-x64\` directly (without the `-o publish` flag, or from that intermediate folder) — that one is the build-time apphost and requires its companion `.dll`/`.json` files to sit right next to it. Moved alone, it does nothing when launched.
+
+If you need a build with zero install requirements instead (fully self-contained, ~150 MB, runs with no .NET install at all), publish with:
+
+```
+dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release -o publish --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 
 ## Project structure
