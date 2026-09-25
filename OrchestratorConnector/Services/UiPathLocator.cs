@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 
 namespace OrchestratorConnector.Services;
 
@@ -21,11 +22,13 @@ public static class UiPathLocator
         @"UiPath\UiPathAssistant\UiPath.Assistant.exe",
     };
 
-    public static string? FindUiRobotExe(string? userOverride = null) => Find(UiRobotRelativePaths, userOverride);
+    public static string? FindUiRobotExe(string? userOverride = null) =>
+        Find(UiRobotRelativePaths, "UiRobot.exe", "Robot", userOverride);
 
-    public static string? FindAssistantExe(string? userOverride = null) => Find(AssistantRelativePaths, userOverride);
+    public static string? FindAssistantExe(string? userOverride = null) =>
+        Find(AssistantRelativePaths, "UiPath.Assistant.exe", "Assistant", userOverride);
 
-    private static string? Find(IEnumerable<string> relativeCandidates, string? userOverride)
+    private static string? Find(IEnumerable<string> relativeCandidates, string exeFileName, string platformComponent, string? userOverride)
     {
         if (!string.IsNullOrWhiteSpace(userOverride) && File.Exists(userOverride))
         {
@@ -44,7 +47,35 @@ public static class UiPathLocator
             }
         }
 
+        // Modern per-user "UiPath Platform" installs place each component under a
+        // version-numbered folder instead, e.g.
+        // %LocalAppData%\Programs\UiPathPlatform\Robot\26.0.202-cloud.25004\UiRobot.exe
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (!string.IsNullOrEmpty(localAppData))
+        {
+            var componentRoot = Path.Combine(localAppData, "Programs", "UiPathPlatform", platformComponent);
+            var versioned = FindInVersionedFolders(componentRoot, exeFileName);
+            if (versioned is not null)
+            {
+                return versioned;
+            }
+        }
+
         return null;
+    }
+
+    private static string? FindInVersionedFolders(string componentRoot, string exeFileName)
+    {
+        if (!Directory.Exists(componentRoot))
+        {
+            return null;
+        }
+
+        // Multiple version folders can exist briefly during an update; prefer the newest.
+        return Directory.GetDirectories(componentRoot)
+            .OrderByDescending(directory => directory, StringComparer.OrdinalIgnoreCase)
+            .Select(directory => Path.Combine(directory, exeFileName))
+            .FirstOrDefault(File.Exists);
     }
 
     private static IEnumerable<string> GetSearchRoots()
