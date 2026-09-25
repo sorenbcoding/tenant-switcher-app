@@ -47,6 +47,9 @@ public static class PasswordBoxAssistant
         var passwordBox = (PasswordBox)sender;
         passwordBox.SetValue(IsUpdating, true);
         SetBoundPassword(passwordBox, passwordBox.Password);
+        // SetValue alone does not reliably push through to a TwoWay binding's source in
+        // every scenario - force it explicitly rather than relying on that happening implicitly.
+        passwordBox.GetBindingExpression(BoundPassword)?.UpdateSource();
         passwordBox.SetValue(IsUpdating, false);
     }
 }
