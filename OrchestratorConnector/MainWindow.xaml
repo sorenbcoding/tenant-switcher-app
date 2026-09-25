@@ -3,12 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:behaviors="clr-namespace:OrchestratorConnector.Behaviors"
         Title="Orchestrator Connector"
-        Height="580" Width="920" MinHeight="500" MinWidth="780"
+        Height="660" Width="960" MinHeight="520" MinWidth="760"
         Background="{StaticResource BackgroundBrush}"
         Icon="/Assets/globe-network-color-icon.ico"
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI">
-    <Grid Margin="28">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
             <Image Source="/Assets/globe-network-color-icon.ico" Width="36" Height="36" Margin="0,0,12,0" />
             <StackPanel>
                 <TextBlock Text="Orchestrator Connector" Style="{StaticResource TitleTextStyle}" />
@@ -27,40 +27,42 @@
         <!-- Body -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="420" />
-                <ColumnDefinition Width="20" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
 
-            <!-- Preset details card -->
+            <!-- Preset details card (primary/larger share of width; scrolls if content ever exceeds available height) -->
             <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}">
-                <StackPanel>
-                    <TextBlock Text="Preset Details" Style="{StaticResource SectionHeaderTextStyle}" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,0,4,0">
+                        <TextBlock Text="Preset Details" Style="{StaticResource SectionHeaderTextStyle}" />
 
-                    <TextBlock Text="Preset Name" Style="{StaticResource FieldLabelStyle}" />
-                    <TextBox Text="{Binding EditPresetName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" />
+                        <TextBlock Text="Preset Name" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBox Text="{Binding EditPresetName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,12" />
 
-                    <TextBlock Text="Orchestrator URL" Style="{StaticResource FieldLabelStyle}" />
-                    <TextBox Text="{Binding EditOrchestratorUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" />
+                        <TextBlock Text="Orchestrator URL" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBox Text="{Binding EditOrchestratorUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,12" />
 
-                    <TextBlock Text="Client / Machine ID" Style="{StaticResource FieldLabelStyle}" />
-                    <TextBox Text="{Binding EditClientId, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" />
+                        <TextBlock Text="Client / Machine ID" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBox Text="{Binding EditClientId, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,12" />
 
-                    <TextBlock Text="Client Secret" Style="{StaticResource FieldLabelStyle}" />
-                    <PasswordBox behaviors:PasswordBoxAssistant.BoundPassword="{Binding EditClientSecret, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource ModernPasswordBoxStyle}" />
-                    <TextBlock Text="Leave blank when editing to keep the currently stored secret."
-                               Style="{StaticResource SubtitleTextStyle}" FontSize="11" Margin="0,4,0,16" TextWrapping="Wrap" />
+                        <TextBlock Text="Client Secret" Style="{StaticResource FieldLabelStyle}" />
+                        <PasswordBox behaviors:PasswordBoxAssistant.BoundPassword="{Binding EditClientSecret, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ModernPasswordBoxStyle}" />
+                        <TextBlock Text="Leave blank when editing to keep the currently stored secret."
+                                   Style="{StaticResource SubtitleTextStyle}" FontSize="11" Margin="0,4,0,14" TextWrapping="Wrap" />
 
-                    <UniformGrid Rows="1" Columns="3">
-                        <Button Content="Add / Save" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,6,0" />
-                        <Button Content="Edit" Command="{Binding EditCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="6,0,6,0" />
-                        <Button Content="Delete" Command="{Binding DeleteCommand}" Style="{StaticResource DangerButtonStyle}" Margin="6,0,0,0" />
-                    </UniformGrid>
-                </StackPanel>
+                        <UniformGrid Rows="1" Columns="3">
+                            <Button Content="Add / Save" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,6,0" />
+                            <Button Content="Edit" Command="{Binding EditCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="6,0,6,0" />
+                            <Button Content="Delete" Command="{Binding DeleteCommand}" Style="{StaticResource DangerButtonStyle}" Margin="6,0,0,0" />
+                        </UniformGrid>
+                    </StackPanel>
+                </ScrollViewer>
             </Border>
 
-            <!-- Presets list + connect card -->
+            <!-- Presets list + connect card (modest, fixed width - comfortably fits a 2-10 item, two-line list; scrolls internally beyond that) -->
             <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -79,8 +81,10 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel>
-                                    <TextBlock Text="{Binding PresetName}" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}" />
-                                    <TextBlock Text="{Binding OrchestratorUrl}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
+                                    <TextBlock Text="{Binding PresetName}" FontWeight="SemiBold" FontSize="14"
+                                               Foreground="{StaticResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding OrchestratorUrl}" FontSize="12"
+                                               Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -94,7 +98,7 @@
         </Grid>
 
         <!-- Status bar -->
-        <Grid Grid.Row="2" Margin="0,18,0,0">
+        <Grid Grid.Row="2" Margin="0,16,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />

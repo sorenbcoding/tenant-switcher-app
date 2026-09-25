@@ -8,10 +8,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Title>Orchestrator Connector</Title>
     <Description>Program for quickly switching between several Orchestrator Tenants.</Description>
-    <Copyright>Søren Schytz Birk</Copyright>
+    <Copyright>Copyright (c) 2026 Søren Schytz Birk</Copyright>
     <RepositoryUrl>https://github.com/sorenbcoding/OrchestratorConnector</RepositoryUrl>
     <PackageReleaseNotes>Program for quickly switching between several Orchestrator Tenants.</PackageReleaseNotes>
     <Authors>Søren Schytz Birk</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>

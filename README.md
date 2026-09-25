@@ -66,4 +66,4 @@ OrchestratorConnector/
 
 ## License
 
-Copyright © Søren Schytz Birk.
+MIT — see [LICENSE](LICENSE).
