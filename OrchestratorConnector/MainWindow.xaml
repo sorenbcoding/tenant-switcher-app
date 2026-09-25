@@ -1,7 +1,6 @@
 <Window x:Class="OrchestratorConnector.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:behaviors="clr-namespace:OrchestratorConnector.Behaviors"
         Title="Orchestrator Connector"
         Height="660" Width="960" MinHeight="520" MinWidth="760"
         Background="{StaticResource BackgroundBrush}"
@@ -48,8 +47,7 @@
                         <TextBox Text="{Binding EditClientId, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,12" />
 
                         <TextBlock Text="Client Secret" Style="{StaticResource FieldLabelStyle}" />
-                        <PasswordBox behaviors:PasswordBoxAssistant.BoundPassword="{Binding EditClientSecret, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource ModernPasswordBoxStyle}" />
+                        <PasswordBox x:Name="ClientSecretBox" Style="{StaticResource ModernPasswordBoxStyle}" PasswordChanged="ClientSecretBox_PasswordChanged" />
                         <TextBlock Text="Leave blank when editing to keep the currently stored secret."
                                    Style="{StaticResource SubtitleTextStyle}" FontSize="11" Margin="0,4,0,14" TextWrapping="Wrap" />
 
