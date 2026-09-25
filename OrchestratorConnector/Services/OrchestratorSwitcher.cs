@@ -9,9 +9,9 @@ namespace OrchestratorConnector.Services;
 public sealed record SwitchProgress(string Message, bool IsError);
 
 /// <summary>
-/// Runs the kill Assistant -> UiRobot --disconnect -> UiRobot --connect -> restart service ->
-/// relaunch Assistant sequence. Hardened version of the original buttonConnect_Click: real
-/// waits instead of fixed delays, ArgumentList instead of an interpolated argument string,
+/// Runs the kill Assistant -> UiRobot --disconnect -> UiRobot --connect -> restart service (if
+/// present) -> relaunch Assistant sequence. Hardened version of the original buttonConnect_Click:
+/// real waits instead of fixed delays, ArgumentList instead of an interpolated argument string,
 /// dynamic executable discovery, and error reporting instead of silent failure.
 /// </summary>
 public sealed class OrchestratorSwitcher
@@ -52,10 +52,10 @@ public sealed class OrchestratorSwitcher
             return false;
         }
 
-        if (!await RestartServiceAsync(ct))
-        {
-            return false;
-        }
+        // Not fatal: newer per-user UiPath Robot installs don't run as a Windows service at
+        // all, so there's nothing to restart there, and the tenant switch already took
+        // effect via UiRobot.exe --connect above regardless.
+        await RestartServiceAsync(ct);
 
         var assistantPath = UiPathLocator.FindAssistantExe();
         if (assistantPath is not null)
@@ -133,6 +133,8 @@ public sealed class OrchestratorSwitcher
         }
     }
 
+    private const int ErrorServiceDoesNotExist = 1060;
+
     private async Task<bool> RestartServiceAsync(CancellationToken ct)
     {
         Report("Restarting UiPath Robot service...", isError: false);
@@ -153,6 +155,13 @@ public sealed class OrchestratorSwitcher
                 },
                 ct);
 
+            return true;
+        }
+        catch (InvalidOperationException ex) when (ex.InnerException is Win32Exception { NativeErrorCode: ErrorServiceDoesNotExist })
+        {
+            // Newer per-user UiPath Robot installs (e.g. "UiPath Platform") don't run as a
+            // Windows service at all - nothing to restart, and that's expected, not an error.
+            Report("No \"UiPath Robot\" Windows service on this machine - skipping (not used by this UiPath install).", isError: false);
             return true;
         }
         catch (Exception ex) when (ex is InvalidOperationException or System.ServiceProcess.TimeoutException or Win32Exception)
