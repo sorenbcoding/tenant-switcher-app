@@ -4,7 +4,7 @@
         Title="Tenant Switcher for UiPath"
         Height="660" Width="960" MinHeight="520" MinWidth="760"
         Background="{StaticResource BackgroundBrush}"
-        Icon="/Assets/globe-network-color-icon.ico"
+        Icon="/Assets/app.ico"
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI">
     <Grid Margin="24">
@@ -16,7 +16,7 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
-            <Image Source="/Assets/globe-network-color-icon.ico" Width="36" Height="36" Margin="0,0,12,0" />
+            <Image Source="/Assets/app.ico" Width="36" Height="36" Margin="0,0,12,0" />
             <StackPanel>
                 <TextBlock Text="Tenant Switcher for UiPath" Style="{StaticResource TitleTextStyle}" />
                 <TextBlock Text="Switch between UiPath Orchestrator tenants in one click." Style="{StaticResource SubtitleTextStyle}" />
