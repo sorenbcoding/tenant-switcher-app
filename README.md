@@ -50,6 +50,8 @@ Each preset has its own card in the window:
 
 **The connected preset** has an accent border and a green **Connected** label. Hover over a card to see its full URL and client ID.
 
+The connected preset comes from the Robot itself, so it is correct whichever tool made the switch. It updates live when the Robot's connection changes, for example after a switch in the Studio extension. If the Robot is connected to a tenant without a preset, a note under **Add preset** says so.
+
 **Theme:** the window follows the Windows light or dark app theme. You can override this in Settings.
 
 ### What a switch does
@@ -79,6 +81,7 @@ Each step is written to `switch.log`. **Show log** opens it.
 | Client secrets | Windows Credential Manager, target `OrchestratorConnector:<preset id>` |
 | Settings, connected preset, last result, uip sync option per preset | `%LocalAppData%\SorenB\TenantSwitcher\settings.json` and `state.json` |
 | Switch log | `%LocalAppData%\SorenB\TenantSwitcher\switch.log` |
+| Connected tenant (read only) | the Robot's `UiPath.settings`, key `UiPathServerUrl`: `%AppData%\UiPath` (user mode) or `%ProgramData%\UiPath` (service mode) |
 
 The preset and secret locations keep the `OrchestratorConnector` name on purpose. They are shared with the Studio extension, so a preset created in one tool appears in the other. The list reloads when the file changes.
 
