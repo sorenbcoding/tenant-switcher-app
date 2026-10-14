@@ -7,6 +7,8 @@ namespace SorenB.TenantSwitcher;
 
 public partial class App : Application
 {
+    private const string Caption = "Tenant Switcher for UiPath";
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -23,11 +25,14 @@ public partial class App : Application
         // MigrationService would otherwise deadlock against the WPF dispatcher.
         await Task.Run(() => MigrationService.TryMigrateLegacyPresets(AppContext.BaseDirectory, presetStore));
 
-        var switcher = new TenantSwitchService(new IdentityClient(), new SwitchLog());
-        var viewModel = new MainViewModel(presetStore, switcher);
+        var identity = new IdentityClient();
+        var log = new SwitchLog();
+        var switcher = new TenantSwitchService(identity, log);
+        var viewModel = new MainViewModel(presetStore, stateStore, switcher, identity, log, theme);
         await viewModel.LoadAsync();
+        presetStore.StartWatching();
 
-        var window = new MainWindow { DataContext = viewModel };
+        var window = new MainWindow(theme) { DataContext = viewModel };
         MainWindow = window;
         window.Show();
     }
@@ -36,7 +41,9 @@ public partial class App : Application
     // window and no dialog - indistinguishable from the exe simply failing to launch at all.
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        MessageBox.Show(e.Exception.ToString(), "Tenant Switcher for UiPath - Unexpected Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(
+            $"Tenant Switcher for UiPath hit an unexpected error — {e.Exception.Message} The app keeps running; if the problem repeats, restart it and report the details below at github.com/sorenbcoding/tenant-switcher-app.\n\n{e.Exception}",
+            Caption, MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true;
     }
 
@@ -44,7 +51,9 @@ public partial class App : Application
     {
         if (e.ExceptionObject is Exception ex)
         {
-            MessageBox.Show(ex.ToString(), "Tenant Switcher for UiPath - Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(
+                $"Tenant Switcher for UiPath stopped — {ex.Message} Start it again; if the problem repeats, report the details below at github.com/sorenbcoding/tenant-switcher-app.\n\n{ex}",
+                Caption, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
