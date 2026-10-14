@@ -1,7 +1,7 @@
 using System.IO;
 using System.Linq;
 
-namespace OrchestratorConnector.Services;
+namespace SorenB.TenantSwitcher.Services;
 
 /// <summary>
 /// Locates UiRobot.exe / UiPath.Assistant.exe across the install locations that vary by

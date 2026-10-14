@@ -1,6 +1,6 @@
-using OrchestratorConnector.Models;
+using SorenB.TenantSwitcher.Models;
 
-namespace OrchestratorConnector.ViewModels;
+namespace SorenB.TenantSwitcher.ViewModels;
 
 public sealed class PresetViewModel : ViewModelBase
 {

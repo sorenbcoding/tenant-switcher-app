@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace OrchestratorConnector.ViewModels;
+namespace SorenB.TenantSwitcher.ViewModels;
 
 public abstract class ViewModelBase : INotifyPropertyChanged
 {

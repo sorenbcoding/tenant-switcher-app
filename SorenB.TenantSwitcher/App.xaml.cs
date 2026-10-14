@@ -1,9 +1,9 @@
 using System.Windows;
 using System.Windows.Threading;
-using OrchestratorConnector.Services;
-using OrchestratorConnector.ViewModels;
+using SorenB.TenantSwitcher.Services;
+using SorenB.TenantSwitcher.ViewModels;
 
-namespace OrchestratorConnector;
+namespace SorenB.TenantSwitcher;
 
 public partial class App : Application
 {
@@ -19,7 +19,7 @@ public partial class App : Application
         // MigrationService would otherwise deadlock against the WPF dispatcher.
         await Task.Run(() => MigrationService.TryMigrateLegacyPresets(AppContext.BaseDirectory, presetStore));
 
-        var switcher = new OrchestratorSwitcher();
+        var switcher = new TenantSwitchService();
         var viewModel = new MainViewModel(presetStore, switcher);
         await viewModel.LoadAsync();
 
@@ -32,7 +32,7 @@ public partial class App : Application
     // window and no dialog - indistinguishable from the exe simply failing to launch at all.
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        MessageBox.Show(e.Exception.ToString(), "Orchestrator Connector - Unexpected Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(e.Exception.ToString(), "Tenant Switcher for UiPath - Unexpected Error", MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true;
     }
 
@@ -40,7 +40,7 @@ public partial class App : Application
     {
         if (e.ExceptionObject is Exception ex)
         {
-            MessageBox.Show(ex.ToString(), "Orchestrator Connector - Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.ToString(), "Tenant Switcher for UiPath - Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

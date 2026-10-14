@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
-using OrchestratorConnector.Models;
+using SorenB.TenantSwitcher.Models;
 
-namespace OrchestratorConnector.Services;
+namespace SorenB.TenantSwitcher.Services;
 
 public sealed record SwitchProgress(string Message, bool IsError);
 
@@ -14,7 +14,7 @@ public sealed record SwitchProgress(string Message, bool IsError);
 /// real waits instead of fixed delays, ArgumentList instead of an interpolated argument string,
 /// dynamic executable discovery, and error reporting instead of silent failure.
 /// </summary>
-public sealed class OrchestratorSwitcher
+public sealed class TenantSwitchService
 {
     private static readonly TimeSpan ProcessTimeout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan ServiceTimeout = TimeSpan.FromSeconds(20);
