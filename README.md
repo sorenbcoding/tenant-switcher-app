@@ -14,14 +14,14 @@ The Studio extension [Tenant Switcher for UiPath Studio](https://github.com/sore
 
 - Windows 10 or 11 with UiPath Studio, Robot or Assistant installed. This includes the per-user *UiPath Platform* install.
 - The [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
-- Download `SorenB.TenantSwitcher.exe` from [Releases](https://github.com/sorenbcoding/tenant-switcher-app/releases), or [build it from source](#building-and-publishing). It is a single file and needs no installer.
+- Download `Tenant Switcher.exe` from [Releases](https://github.com/sorenbcoding/tenant-switcher-app/releases), or [build it from source](#building-and-publishing). It is a single file and needs no installer.
 - You also need a machine in Orchestrator that uses **client ID / client secret** credentials, either a machine template or a standard machine.
 
 **Upgrading from *Orchestrator Connector*:** your presets and secrets are kept.
 
 ## Quick example
 
-1. Start `SorenB.TenantSwitcher.exe` and select **Add preset**.
+1. Start `Tenant Switcher.exe` and select **Add preset**.
 2. Fill in the form:
    - Name: `Acme production`
    - URL: `https://cloud.uipath.com/acme/Production/orchestrator_`
@@ -97,7 +97,7 @@ dotnet test SorenB.TenantSwitcher.sln
 dotnet publish SorenB.TenantSwitcher\SorenB.TenantSwitcher.csproj -c Release -o publish
 ```
 
-`publish\SorenB.TenantSwitcher.exe` is the only file to distribute; you can delete the `.pdb`.
+`publish\Tenant Switcher.exe` is the only file to distribute; you can delete the `.pdb`. The publish step gives the exe this name; the assembly itself is `SorenB.TenantSwitcher`, so Debug builds in `bin\` keep that name.
 
 The exe in `bin\Release\…` is not the same file. It is the build-time apphost and needs the `.dll` and `.json` files next to it.
 
