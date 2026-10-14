@@ -14,6 +14,10 @@ public partial class App : Application
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
 
+        var stateStore = new AppStateStore();
+        var theme = new ThemeService();
+        theme.Apply(stateStore.LoadSettings().Theme);
+
         var presetStore = new PresetStore();
         // Runs off the UI thread: blocking .GetAwaiter().GetResult() calls inside
         // MigrationService would otherwise deadlock against the WPF dispatcher.

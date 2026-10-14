@@ -4,6 +4,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- ThemeService inserts Semantic.Light/Dark.xaml at index 0 on startup. -->
+                <ResourceDictionary Source="Themes/Controls.xaml" />
                 <ResourceDictionary Source="Themes/ModernTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
