@@ -1,0 +1,22 @@
+<!-- Maps the SorenB tokens to the keys the app's styles use (light theme). Swapped at runtime by ThemeService. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="SorenB.Theme.Light.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <SolidColorBrush x:Key="App.Background" Color="{StaticResource SB.Color.SurfaceAlt}" />
+    <SolidColorBrush x:Key="App.Card" Color="{StaticResource SB.Color.Surface}" />
+    <SolidColorBrush x:Key="App.Input" Color="{StaticResource SB.Color.Surface}" />
+    <SolidColorBrush x:Key="App.Hover" Color="{StaticResource SB.Color.SurfaceAlt}" />
+    <SolidColorBrush x:Key="App.Fg" Color="{StaticResource SB.Color.Ink}" />
+    <SolidColorBrush x:Key="App.Muted" Color="{StaticResource SB.Color.Slate600}" />
+    <SolidColorBrush x:Key="App.Border" Color="{StaticResource SB.Color.Slate300}" />
+    <SolidColorBrush x:Key="App.Accent" Color="{StaticResource SB.Color.AccentApp}" />
+    <SolidColorBrush x:Key="App.OnAccent" Color="{StaticResource SB.Color.Surface}" />
+    <SolidColorBrush x:Key="App.Success" Color="{StaticResource SB.Color.StatusSuccess}" />
+    <SolidColorBrush x:Key="App.Warning" Color="{StaticResource SB.Color.StatusWarning}" />
+    <SolidColorBrush x:Key="App.Error" Color="{StaticResource SB.Color.StatusError}" />
+
+    <BitmapImage x:Key="App.Logo" UriSource="pack://application:,,,/Assets/logo-light.png" />
+</ResourceDictionary>
