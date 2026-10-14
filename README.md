@@ -14,14 +14,14 @@ The Studio extension [Tenant Switcher for UiPath Studio](https://github.com/sore
 
 - Windows 10 or 11 with UiPath Studio, Robot or Assistant installed. This includes the per-user *UiPath Platform* install.
 - The [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
-- Download `SorenB.TenantSwitcher.exe` from [Releases](https://github.com/sorenbcoding/tenant-switcher-app/releases), or [build it from source](#building-and-publishing). It is a single file and needs no installer.
+- Download `Tenant Switcher.exe` from [Releases](https://github.com/sorenbcoding/tenant-switcher-app/releases), or [build it from source](#building-and-publishing). It is a single file and needs no installer.
 - You also need a machine in Orchestrator that uses **client ID / client secret** credentials, either a machine template or a standard machine.
 
 **Upgrading from *Orchestrator Connector*:** your presets and secrets are kept.
 
 ## Quick example
 
-1. Start `SorenB.TenantSwitcher.exe` and select **Add preset**.
+1. Start `Tenant Switcher.exe` and select **Add preset**.
 2. Fill in the form:
    - Name: `Acme production`
    - URL: `https://cloud.uipath.com/acme/Production/orchestrator_`
@@ -49,6 +49,8 @@ Each preset has its own card in the window:
 **Switch results** appear as a banner at the top of the window, with **Show log** and **OK**. A result stays until you select **OK**, including across restarts.
 
 **The connected preset** has an accent border and a green **Connected** label. Hover over a card to see its full URL and client ID.
+
+The connected preset comes from the Robot itself, so it is correct whichever tool made the switch. It updates live when the Robot's connection changes, for example after a switch in the Studio extension. If the Robot is connected to a tenant without a preset, a note under **Add preset** says so.
 
 **Theme:** the window follows the Windows light or dark app theme. You can override this in Settings.
 
@@ -79,6 +81,7 @@ Each step is written to `switch.log`. **Show log** opens it.
 | Client secrets | Windows Credential Manager, target `OrchestratorConnector:<preset id>` |
 | Settings, connected preset, last result, uip sync option per preset | `%LocalAppData%\SorenB\TenantSwitcher\settings.json` and `state.json` |
 | Switch log | `%LocalAppData%\SorenB\TenantSwitcher\switch.log` |
+| Connected tenant (read only) | the Robot's `UiPath.settings`, key `UiPathServerUrl`: `%AppData%\UiPath` (user mode) or `%ProgramData%\UiPath` (service mode) |
 
 The preset and secret locations keep the `OrchestratorConnector` name on purpose. They are shared with the Studio extension, so a preset created in one tool appears in the other. The list reloads when the file changes.
 
@@ -97,7 +100,7 @@ dotnet test SorenB.TenantSwitcher.sln
 dotnet publish SorenB.TenantSwitcher\SorenB.TenantSwitcher.csproj -c Release -o publish
 ```
 
-`publish\SorenB.TenantSwitcher.exe` is the only file to distribute; you can delete the `.pdb`.
+`publish\Tenant Switcher.exe` is the only file to distribute; you can delete the `.pdb`. The publish step gives the exe this name; the assembly itself is `SorenB.TenantSwitcher`, so Debug builds in `bin\` keep that name.
 
 The exe in `bin\Release\…` is not the same file. It is the build-time apphost and needs the `.dll` and `.json` files next to it.
 
