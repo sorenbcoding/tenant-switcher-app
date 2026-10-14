@@ -14,7 +14,8 @@ WPF desktop app (.NET 8, `net8.0-windows`) for switching the local UiPath Robot 
 ## Constraints
 - **Do not rename the shared store.** Keep `%AppData%\OrchestratorConnector\presets.json` (bare array, PascalCase keys), `preset-meta.json` beside it, and the Credential Manager target `OrchestratorConnector:<guid>`. They are shared with the Studio extension.
 - App-only state (settings, last switch, log) lives in `%LocalAppData%\SorenB\TenantSwitcher\`.
+- The connected tenant comes from the Robot's `UiPath.settings` (`UiPathServerUrl`; `%AppData%\UiPath`, or `%ProgramData%\UiPath` in service mode), watched live in `Services/RobotConnection.cs`. The extension reads the same file. Never write to it.
 - Flat UI: no shadows, no gradients, no orange. Accent is `App.Accent` (slate) only.
 
 ## Commands
-`dotnet build SorenB.TenantSwitcher.sln`, `dotnet test`, `dotnet publish SorenB.TenantSwitcher -c Release`. Brand check: `python ~/.claude/skills/sorenb-brand/scripts/brand_check.py . --category app`.
+`dotnet build SorenB.TenantSwitcher.sln`, `dotnet test`, `dotnet publish SorenB.TenantSwitcher -c Release -o publish` (produces `publish\Tenant Switcher.exe`). Brand check: `python ~/.claude/skills/sorenb-brand/scripts/brand_check.py . --category app`.

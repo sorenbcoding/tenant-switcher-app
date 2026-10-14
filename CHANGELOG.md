@@ -7,6 +7,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Changed
 - The published executable is named `Tenant Switcher.exe`, matching the name the Studio extension shows in the activity bar. The assembly ID stays `SorenB.TenantSwitcher`.
+- The **Connected** preset is read from the Robot's own `UiPath.settings` (`UiPathServerUrl`) instead of the app's last switch. It is correct after a switch in the Studio extension and updates live.
+- A failed switch rolls back to the tenant the Robot was actually connected to, even if another tool connected it.
+
+### Added
+- A note under **Add preset** when the Robot is connected to a tenant that matches no preset.
 
 ## [0.4.0] - 2026-10-14
 

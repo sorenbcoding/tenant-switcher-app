@@ -28,9 +28,11 @@ public partial class App : Application
         var identity = new IdentityClient();
         var log = new SwitchLog();
         var switcher = new TenantSwitchService(identity, log);
-        var viewModel = new MainViewModel(presetStore, stateStore, switcher, identity, log, theme);
+        var robot = new RobotConnection();
+        var viewModel = new MainViewModel(presetStore, stateStore, switcher, identity, log, robot, theme);
         await viewModel.LoadAsync();
         presetStore.StartWatching();
+        robot.StartWatching();
 
         var window = new MainWindow(theme) { DataContext = viewModel };
         MainWindow = window;

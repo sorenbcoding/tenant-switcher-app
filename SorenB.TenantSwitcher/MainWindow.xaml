@@ -236,6 +236,9 @@
                             Visibility="{Binding Form, Converter={StaticResource CollapsedWhen}}" />
                     <ContentControl Content="{Binding Form}" Focusable="False" />
 
+                    <TextBlock Text="{Binding UnmatchedConnection}" Style="{StaticResource Text.Caption}" Margin="0,0,0,12"
+                               Visibility="{Binding UnmatchedConnection, Converter={StaticResource VisibleWhen}}" />
+
                     <TextBlock Text="{Binding LoadError}" Style="{StaticResource Text.Error}" Margin="0,0,0,12"
                                Visibility="{Binding LoadError, Converter={StaticResource VisibleWhen}}" />
                     <TextBlock Text="No presets yet. A preset stores an Orchestrator tenant URL and the client ID and secret of an Orchestrator machine."

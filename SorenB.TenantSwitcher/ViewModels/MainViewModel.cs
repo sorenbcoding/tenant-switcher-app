@@ -29,6 +29,7 @@ public sealed class MainViewModel : ViewModelBase
     private readonly TenantSwitchService _switcher;
     private readonly IdentityClient _identity;
     private readonly SwitchLog _log;
+    private readonly RobotConnection _robot;
     private readonly AppState _state;
 
     private List<Preset> _presets = new();
@@ -39,14 +40,16 @@ public sealed class MainViewModel : ViewModelBase
     private string _switchTarget = string.Empty;
     private string _switchStep = string.Empty;
     private BannerViewModel? _notice;
+    private string _unmatchedConnection = string.Empty;
 
-    public MainViewModel(PresetStore store, AppStateStore stateStore, TenantSwitchService switcher, IdentityClient identity, SwitchLog log, ThemeService theme)
+    public MainViewModel(PresetStore store, AppStateStore stateStore, TenantSwitchService switcher, IdentityClient identity, SwitchLog log, RobotConnection robot, ThemeService theme)
     {
         _store = store;
         _stateStore = stateStore;
         _switcher = switcher;
         _identity = identity;
         _log = log;
+        _robot = robot;
         _state = stateStore.LoadState();
         Settings = new SettingsViewModel(stateStore, theme);
 
@@ -58,6 +61,7 @@ public sealed class MainViewModel : ViewModelBase
         OpenRepositoryCommand = new RelayCommand(_ => OpenExternal(RepositoryUrl));
 
         _store.Changed += (_, _) => Application.Current?.Dispatcher.InvokeAsync(ReloadAsync);
+        _robot.Changed += (_, _) => Application.Current?.Dispatcher.InvokeAsync(RefreshActive);
         RefreshBanners();
     }
 
@@ -98,6 +102,13 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     public bool IsEmpty => _presets.Count == 0 && Form is null && LoadError.Length == 0;
+
+    /// <summary>Shown when the Robot is connected to a tenant that no preset matches.</summary>
+    public string UnmatchedConnection
+    {
+        get => _unmatchedConnection;
+        private set => SetField(ref _unmatchedConnection, value);
+    }
 
     public bool IsSwitching
     {
@@ -160,7 +171,7 @@ public sealed class MainViewModel : ViewModelBase
         Presets.Clear();
         foreach (var preset in _presets.OrderBy(p => p.PresetName, StringComparer.CurrentCultureIgnoreCase))
         {
-            var card = new PresetCardViewModel(this, preset, preset.Id == _state.ActivePresetId, SyncUipCli(preset.Id));
+            var card = new PresetCardViewModel(this, preset, isActive: false, SyncUipCli(preset.Id));
             if (prompts.TryGetValue(preset.Id, out var prompt))
             {
                 card.SetPrompt(prompt.Prompt, prompt.PromptMessage);
@@ -169,7 +180,24 @@ public sealed class MainViewModel : ViewModelBase
             Presets.Add(card);
         }
 
+        RefreshActive();
         OnPropertyChanged(nameof(IsEmpty));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    /// <summary>Marks the card the Robot is actually connected to, from the Robot's own settings file.</summary>
+    public void RefreshActive()
+    {
+        var serverUrl = _robot.ReadServerUrl();
+        var active = RobotConnection.ResolveActive(_presets, serverUrl, _state.ActivePresetId);
+        foreach (var card in Presets)
+        {
+            card.IsActive = card.Id == active?.Id;
+        }
+
+        UnmatchedConnection = active is null && !string.IsNullOrEmpty(serverUrl) && !IsSwitching
+            ? $"The Robot is connected to {OrchestratorUrl.ShortUrl(serverUrl)}, which matches no preset."
+            : string.Empty;
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -258,9 +286,9 @@ public sealed class MainViewModel : ViewModelBase
 
     private async Task SwitchAsync(Preset target)
     {
-        var previous = _state.ActivePresetId is { } activeId && activeId != target.Id
-            ? _presets.FirstOrDefault(p => p.Id == activeId)
-            : null;
+        // The tenant to roll back to is whatever the Robot is connected to now, even if the extension switched to it.
+        var current = RobotConnection.ResolveActive(_presets, _robot.ReadServerUrl(), _state.ActivePresetId);
+        var previous = current?.Id != target.Id ? current : null;
         var syncUip = SyncUipCli(target.Id) && OrchestratorUrl.GetTenantParts(target.OrchestratorUrl) is not null;
 
         _notice = null;
@@ -281,19 +309,15 @@ public sealed class MainViewModel : ViewModelBase
         {
             _state.ActivePresetId = target.Id;
         }
-        else if (!result.RolledBack)
+        else
         {
-            _state.ActivePresetId = null;
+            _state.ActivePresetId = result.RolledBack ? previous?.Id : null;
         }
 
         _state.LastResult = result;
         SaveState();
         IsSwitching = false;
-        foreach (var card in Presets)
-        {
-            card.IsActive = card.Id == _state.ActivePresetId;
-        }
-
+        RefreshActive();
         RefreshBanners();
     }
 
