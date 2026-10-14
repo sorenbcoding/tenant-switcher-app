@@ -1,4 +1,4 @@
-namespace OrchestratorConnector.Models;
+namespace SorenB.TenantSwitcher.Models;
 
 public sealed class Preset
 {

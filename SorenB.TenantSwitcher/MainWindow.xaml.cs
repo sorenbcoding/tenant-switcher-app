@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Windows;
-using OrchestratorConnector.ViewModels;
+using SorenB.TenantSwitcher.ViewModels;
 
-namespace OrchestratorConnector;
+namespace SorenB.TenantSwitcher;
 
 public partial class MainWindow : Window
 {

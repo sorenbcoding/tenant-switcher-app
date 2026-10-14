@@ -1,8 +1,8 @@
 using System.IO;
 using System.Text.Json;
-using OrchestratorConnector.Models;
+using SorenB.TenantSwitcher.Models;
 
-namespace OrchestratorConnector.Services;
+namespace SorenB.TenantSwitcher.Services;
 
 /// <summary>
 /// Loads and saves the non-secret preset metadata to %AppData%\OrchestratorConnector\presets.json.
@@ -21,6 +21,7 @@ public sealed class PresetStore
     {
         var directory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            // Shared with the Tenant Switcher for UiPath Studio extension. Do not rename.
             "OrchestratorConnector");
         return Path.Combine(directory, "presets.json");
     }

@@ -1,8 +1,8 @@
 using System.IO;
 using System.Text.Json;
-using OrchestratorConnector.Models;
+using SorenB.TenantSwitcher.Models;
 
-namespace OrchestratorConnector.Services;
+namespace SorenB.TenantSwitcher.Services;
 
 /// <summary>
 /// One-time migration from the pre-refactor plaintext presets.json (written next to the exe)

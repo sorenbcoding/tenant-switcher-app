@@ -1,6 +1,6 @@
 using System.Windows.Input;
 
-namespace OrchestratorConnector.ViewModels;
+namespace SorenB.TenantSwitcher.ViewModels;
 
 public sealed class RelayCommand : ICommand
 {

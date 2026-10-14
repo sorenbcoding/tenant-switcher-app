@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace OrchestratorConnector.Services;
+namespace SorenB.TenantSwitcher.Services;
 
 /// <summary>
 /// Stores the Client Secret for each preset in Windows Credential Manager (target name
@@ -15,6 +15,9 @@ public static class CredentialService
     private const int CredTypeGeneric = 1;
     private const int CredPersistLocalMachine = 2;
     private const int ErrorNotFound = 1168;
+
+    // Shared with the Tenant Switcher for UiPath Studio extension. Do not rename.
+    private const string TargetPrefix = "OrchestratorConnector";
 
     public static void SaveSecret(Guid presetId, string secret)
     {
@@ -36,7 +39,7 @@ public static class CredentialService
                 CredentialBlobSize = secretBytes.Length,
                 CredentialBlob = blobPtr,
                 Persist = CredPersistLocalMachine,
-                UserName = "OrchestratorConnector",
+                UserName = TargetPrefix,
             };
 
             if (!NativeMethods.CredWrite(ref credential, 0))
@@ -98,7 +101,7 @@ public static class CredentialService
         }
     }
 
-    private static string BuildTargetName(Guid presetId) => $"OrchestratorConnector:{presetId:D}";
+    private static string BuildTargetName(Guid presetId) => $"{TargetPrefix}:{presetId:D}";
 
     private static class NativeMethods
     {

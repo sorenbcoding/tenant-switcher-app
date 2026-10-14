@@ -1,14 +1,14 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using OrchestratorConnector.Models;
-using OrchestratorConnector.Services;
+using SorenB.TenantSwitcher.Models;
+using SorenB.TenantSwitcher.Services;
 
-namespace OrchestratorConnector.ViewModels;
+namespace SorenB.TenantSwitcher.ViewModels;
 
 public sealed class MainViewModel : ViewModelBase
 {
     private readonly PresetStore _store;
-    private readonly OrchestratorSwitcher _switcher;
+    private readonly TenantSwitchService _switcher;
 
     private PresetViewModel? _selectedPreset;
     private string _editPresetName = string.Empty;
@@ -18,7 +18,7 @@ public sealed class MainViewModel : ViewModelBase
     private string _statusMessage = "Ready.";
     private bool _isBusy;
 
-    public MainViewModel(PresetStore store, OrchestratorSwitcher switcher)
+    public MainViewModel(PresetStore store, TenantSwitchService switcher)
     {
         _store = store;
         _switcher = switcher;
