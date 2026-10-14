@@ -5,19 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-### Changed
-- The published executable is named `Tenant Switcher.exe`, matching the name the Studio extension shows in the activity bar. The assembly ID stays `SorenB.TenantSwitcher`.
-- The **Connected** preset is read from the Robot's own `UiPath.settings` (`UiPathServerUrl`) instead of the app's last switch. It is correct after a switch in the Studio extension and updates live.
-- A failed switch rolls back to the tenant the Robot was actually connected to, even if another tool connected it.
-
-### Added
-- A note under **Add preset** when the Robot is connected to a tenant that matches no preset.
-
 ## [0.4.0] - 2026-10-14
 
 ### Changed
 - Renamed from *Orchestrator Connector* to *Tenant Switcher for UiPath*.
-  - The executable is now `SorenB.TenantSwitcher.exe`.
+  - The executable is now `Tenant Switcher.exe`, matching the name the Studio extension shows in the activity bar. The assembly ID is `SorenB.TenantSwitcher`.
   - Presets and secrets are kept: the shared `%AppData%\OrchestratorConnector` folder and Credential Manager targets are unchanged.
 - New window, with the same layout as the Studio extension:
   - A single column with an **Add preset** button and an inline form.
@@ -33,7 +25,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Added
 - **Test** in the form requests a token from Identity Server without touching the Robot.
 - The credentials are checked before a switch. Rejected credentials stop the switch before the Robot is disconnected.
-- If the connect fails, the previously connected preset is reconnected.
+- If the connect fails, the tenant the Robot was connected to before is reconnected.
 - Form validation with a message per field. The app now rejects a missing secret, an incomplete Automation Cloud URL and a duplicate name.
 - Optional uip CLI sign-in per preset (**Also sign in the uip CLI to this tenant**).
 - **Settings:**
@@ -46,6 +38,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - **About** screen with version, repository link and disclaimer.
 - Switch log in `%LocalAppData%\SorenB\TenantSwitcher\switch.log`, with secrets masked.
 - The preset list reloads when `presets.json` changes, for example after an edit in the Studio extension.
+- The **Connected** preset is read from the Robot's own `UiPath.settings` (`UiPathServerUrl`), so it is correct after a switch in the Studio extension, and it updates live.
+- A note under **Add preset** when the Robot is connected to a tenant that matches no preset.
 - Unit tests for URL handling, validation, the identity check, the stores and the locator.
 
 ### Fixed
