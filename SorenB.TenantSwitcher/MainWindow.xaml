@@ -1,0 +1,358 @@
+<Window x:Class="SorenB.TenantSwitcher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:SorenB.TenantSwitcher.ViewModels"
+        xmlns:ui="clr-namespace:SorenB.TenantSwitcher.Themes"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="Tenant Switcher for UiPath"
+        Width="440" Height="680" MinWidth="380" MinHeight="480"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/app.ico"
+        Background="{DynamicResource App.Background}"
+        Foreground="{DynamicResource App.Fg}"
+        FontFamily="{DynamicResource SB.Font.Sans}"
+        FontSize="14"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+
+    <Window.Resources>
+        <!-- Banner: progress, last result or notice. Severity shows as a 3 px bar on the left. -->
+        <DataTemplate DataType="{x:Type vm:BannerViewModel}">
+            <Border Background="{DynamicResource App.Card}" BorderBrush="{DynamicResource App.Border}" BorderThickness="1"
+                    CornerRadius="4" Margin="0,0,0,8" SnapsToDevicePixels="True">
+                <DockPanel>
+                    <Border DockPanel.Dock="Left" Style="{StaticResource BannerBar}" Tag="{Binding SeverityName}" />
+                    <StackPanel Margin="12,8">
+                        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                        <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Caption}"
+                                   Visibility="{Binding Detail, Converter={StaticResource VisibleWhen}}" />
+                        <WrapPanel HorizontalAlignment="Right" Margin="0,4,0,0"
+                                   Visibility="{Binding HasButtons, Converter={StaticResource VisibleWhen}}">
+                            <Button Content="Show log" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0"
+                                    Command="{Binding ShowLogCommand}"
+                                    Visibility="{Binding ShowLogCommand, Converter={StaticResource VisibleWhen}}" />
+                            <Button Content="Open settings" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0"
+                                    Command="{Binding OpenSettingsCommand}"
+                                    Visibility="{Binding OpenSettingsCommand, Converter={StaticResource VisibleWhen}}" />
+                            <Button Content="OK" Style="{StaticResource Button.Primary}" Margin="8,0,0,0"
+                                    Command="{Binding OkCommand}"
+                                    Visibility="{Binding OkCommand, Converter={StaticResource VisibleWhen}}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- Add/edit form card. -->
+        <DataTemplate DataType="{x:Type vm:PresetFormViewModel}">
+            <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                <StackPanel IsEnabled="{Binding IsIdle}">
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Heading}" Margin="0,0,0,12" />
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Name" Style="{StaticResource Text.Label}" />
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Name"
+                                 ui:Ui.Placeholder="Acme production" ui:Ui.FocusOnLoad="True"
+                                 ui:Ui.HasError="{Binding HasNameError}" />
+                        <TextBlock Text="{Binding NameError}" Style="{StaticResource Text.Error}" Margin="0,4,0,0"
+                                   Visibility="{Binding NameError, Converter={StaticResource VisibleWhen}}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Orchestrator URL" Style="{StaticResource Text.Label}" />
+                        <TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Orchestrator URL"
+                                 ui:Ui.Placeholder="https://cloud.uipath.com/acme/Production/orchestrator_"
+                                 ui:Ui.HasError="{Binding HasUrlError}" />
+                        <TextBlock Text="{Binding UrlError}" Style="{StaticResource Text.Error}" Margin="0,4,0,0"
+                                   Visibility="{Binding UrlError, Converter={StaticResource VisibleWhen}}" />
+                        <TextBlock Text="Tenant URL including organization and tenant." Style="{StaticResource Text.Caption}" Margin="0,4,0,0"
+                                   Visibility="{Binding UrlError, Converter={StaticResource CollapsedWhen}}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Client ID" Style="{StaticResource Text.Label}" />
+                        <TextBox Text="{Binding ClientId, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Client ID"
+                                 ui:Ui.HasError="{Binding HasClientIdError}" />
+                        <TextBlock Text="{Binding ClientIdError}" Style="{StaticResource Text.Error}" Margin="0,4,0,0"
+                                   Visibility="{Binding ClientIdError, Converter={StaticResource VisibleWhen}}" />
+                        <TextBlock Text="From the machine in Orchestrator (Tenant &gt; Machines)." Style="{StaticResource Text.Caption}" Margin="0,4,0,0"
+                                   Visibility="{Binding ClientIdError, Converter={StaticResource CollapsedWhen}}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Client secret" Style="{StaticResource Text.Label}" />
+                        <PasswordBox ui:Ui.Password="{Binding Secret, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Client secret"
+                                     ui:Ui.Placeholder="{Binding SecretPlaceholder}" ui:Ui.HasError="{Binding HasSecretError}" />
+                        <TextBlock Text="{Binding SecretError}" Style="{StaticResource Text.Error}" Margin="0,4,0,0"
+                                   Visibility="{Binding SecretError, Converter={StaticResource VisibleWhen}}" />
+                    </StackPanel>
+
+                    <CheckBox Content="Also sign in the uip CLI to this tenant" IsChecked="{Binding SyncUipCli}" Margin="0,0,0,12" />
+
+                    <TextBlock Text="{Binding TestResult}" Margin="0,0,0,12"
+                               Visibility="{Binding TestResult, Converter={StaticResource VisibleWhen}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Error}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TestOk}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource App.Success}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <WrapPanel>
+                        <Button Content="Save" Style="{StaticResource Button.Primary}" Command="{Binding SaveCommand}" IsDefault="True" Margin="0,0,8,0" />
+                        <Button Content="Test" Style="{StaticResource Button.Secondary}" Command="{Binding TestCommand}" Margin="0,0,8,0" />
+                        <Button Content="Cancel" Style="{StaticResource Button.Secondary}" Command="{Binding CancelCommand}" IsCancel="True" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- Preset card. -->
+        <DataTemplate DataType="{x:Type vm:PresetCardViewModel}">
+            <Border ToolTip="{Binding ToolTip}">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                <Setter Property="BorderBrush" Value="{DynamicResource App.Accent}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Stroke" Value="{DynamicResource App.Muted}" />
+                                    <Setter Property="StrokeThickness" Value="1" />
+                                    <Setter Property="Fill" Value="Transparent" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                            <Setter Property="Stroke" Value="{DynamicResource App.Success}" />
+                                            <Setter Property="Fill" Value="{DynamicResource App.Success}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="2" Text="Connected" FontSize="12" Foreground="{DynamicResource App.Success}"
+                                   Margin="8,0,0,0" VerticalAlignment="Center"
+                                   Visibility="{Binding IsActive, Converter={StaticResource VisibleWhen}}" />
+                    </Grid>
+                    <TextBlock Text="{Binding ShortUrl}" FontSize="12" Foreground="{DynamicResource App.Muted}"
+                               TextTrimming="CharacterEllipsis" Margin="16,2,0,8" />
+
+                    <!-- Actions -->
+                    <Grid Margin="16,0,0,0" Visibility="{Binding IsPromptOpen, Converter={StaticResource CollapsedWhen}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Content="Connect" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left"
+                                Command="{Binding ConnectCommand}"
+                                Visibility="{Binding IsActive, Converter={StaticResource CollapsedWhen}}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Style="{StaticResource Button.Icon}" Tag="{StaticResource Icon.Edit}" Margin="0,0,4,0"
+                                    Command="{Binding EditCommand}" ToolTip="{Binding EditLabel}"
+                                    AutomationProperties.Name="{Binding EditLabel}" />
+                            <Button Style="{StaticResource Button.Icon}" Tag="{StaticResource Icon.Trash}"
+                                    Command="{Binding DeleteCommand}" ToolTip="{Binding DeleteLabel}"
+                                    AutomationProperties.Name="{Binding DeleteLabel}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Inline prompt: replaces the actions row. -->
+                    <StackPanel Margin="16,0,0,0" Visibility="{Binding IsPromptOpen, Converter={StaticResource VisibleWhen}}">
+                        <TextBlock Text="{Binding PromptQuestion}" TextWrapping="Wrap" Margin="0,0,0,4"
+                                   Visibility="{Binding PromptQuestion, Converter={StaticResource VisibleWhen}}" />
+                        <TextBlock Text="{Binding PromptDetail}" Style="{StaticResource Text.Caption}" Margin="0,0,0,8" />
+                        <WrapPanel Visibility="{Binding HasPromptButtons, Converter={StaticResource VisibleWhen}}">
+                            <Button Content="{Binding PromptPrimaryText}" Style="{StaticResource Button.Primary}" Margin="0,0,8,0"
+                                    Command="{Binding PromptPrimaryCommand}" />
+                            <Button Content="Cancel" Style="{StaticResource Button.Secondary}" Command="{Binding PromptCancelCommand}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <Style x:Key="SectionHeader" TargetType="DockPanel">
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header: logo lockup and view buttons. -->
+        <Border Background="{DynamicResource App.Card}" BorderBrush="{DynamicResource App.Border}" BorderThickness="0,0,0,1" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Image Source="{DynamicResource App.Logo}" Width="32" Height="32" Margin="0,0,12,0"
+                       RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Tenant Switcher for UiPath" Style="{StaticResource Text.Title}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="By Søren Schytz Birk" FontSize="12" Foreground="{DynamicResource App.Muted}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource Button.Icon}" Tag="{StaticResource Icon.Settings}" Margin="0,0,4,0"
+                            Command="{Binding ShowSettingsCommand}" ToolTip="Settings" AutomationProperties.Name="Settings" />
+                    <Button Style="{StaticResource Button.Icon}" Tag="{StaticResource Icon.Info}"
+                            Command="{Binding ShowAboutCommand}" ToolTip="About" AutomationProperties.Name="About" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+            <Grid Margin="16">
+
+                <!-- Presets view -->
+                <StackPanel Visibility="{Binding View, Converter={StaticResource VisibleWhen}, ConverterParameter=Presets}">
+                    <ItemsControl ItemsSource="{Binding Banners}" Focusable="False" />
+
+                    <Button Content="Add preset" Style="{StaticResource Button.Primary}" HorizontalAlignment="Stretch" Margin="0,0,0,12"
+                            Command="{Binding AddPresetCommand}"
+                            Visibility="{Binding Form, Converter={StaticResource CollapsedWhen}}" />
+                    <ContentControl Content="{Binding Form}" Focusable="False" />
+
+                    <TextBlock Text="{Binding LoadError}" Style="{StaticResource Text.Error}" Margin="0,0,0,12"
+                               Visibility="{Binding LoadError, Converter={StaticResource VisibleWhen}}" />
+                    <TextBlock Text="No presets yet. A preset stores an Orchestrator tenant URL and the client ID and secret of an Orchestrator machine."
+                               Style="{StaticResource Text.Caption}" Margin="0,0,0,12"
+                               Visibility="{Binding IsEmpty, Converter={StaticResource VisibleWhen}}" />
+
+                    <ItemsControl ItemsSource="{Binding Presets}" Focusable="False" />
+                </StackPanel>
+
+                <!-- Settings view -->
+                <StackPanel DataContext="{Binding Settings}"
+                            Visibility="{Binding DataContext.View, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource VisibleWhen}, ConverterParameter=Settings}">
+                    <DockPanel Style="{StaticResource SectionHeader}">
+                        <Button Style="{StaticResource Button.Icon}" Tag="{StaticResource Icon.Back}" Margin="0,0,8,0"
+                                Command="{Binding DataContext.ShowPresetsCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                ToolTip="Back to presets" AutomationProperties.Name="Back to presets" />
+                        <TextBlock Text="Settings" Style="{StaticResource Text.Heading}" VerticalAlignment="Center" />
+                    </DockPanel>
+
+                    <TextBlock Text="{Binding SaveError}" Style="{StaticResource Text.Error}" Margin="0,0,0,12"
+                               Visibility="{Binding SaveError, Converter={StaticResource VisibleWhen}}" />
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Theme" Style="{StaticResource Text.Label}" Margin="0,0,0,8" />
+                            <RadioButton GroupName="Theme" Content="Use the Windows setting" IsChecked="{Binding ThemeSystem}" Margin="0,0,0,8" />
+                            <RadioButton GroupName="Theme" Content="Light" IsChecked="{Binding ThemeLight}" Margin="0,0,0,8" />
+                            <RadioButton GroupName="Theme" Content="Dark" IsChecked="{Binding ThemeDark}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Switching" Style="{StaticResource Text.Label}" Margin="0,0,0,8" />
+                            <CheckBox Content="Ask before switching" IsChecked="{Binding ConfirmBeforeSwitch}" />
+                            <TextBlock Text="Shows a confirmation on the card before the Robot is reconnected. Default: on."
+                                       Style="{StaticResource Text.Caption}" Margin="24,4,0,12" />
+                            <CheckBox Content="Check the credentials before switching" IsChecked="{Binding ValidateBeforeSwitch}" />
+                            <TextBlock Text="Requests a token from Identity Server first, so a wrong secret never disconnects the Robot. Default: on."
+                                       Style="{StaticResource Text.Caption}" Margin="24,4,0,12" />
+                            <CheckBox Content="Restart UiPath Assistant" IsChecked="{Binding RestartAssistant}" />
+                            <TextBlock Text="Closes Assistant before the switch and starts it again afterwards, so it shows the new tenant. Default: on."
+                                       Style="{StaticResource Text.Caption}" Margin="24,4,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="UiRobot.exe path" Style="{StaticResource Text.Label}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding UiRobotPath}" AutomationProperties.Name="UiRobot.exe path"
+                                         ui:Ui.Placeholder="Search the default locations" ui:Ui.HasError="{Binding UiRobotPathInvalid}" />
+                                <Button Grid.Column="1" Content="Browse…" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0"
+                                        Command="{Binding BrowseUiRobotCommand}" />
+                            </Grid>
+                            <TextBlock Text="{Binding UiRobotStatus}" Margin="0,4,0,12">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Caption}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding UiRobotPathInvalid}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource App.Error}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <TextBlock Text="uip CLI path" Style="{StaticResource Text.Label}" />
+                            <TextBox Text="{Binding UipCliPath}" AutomationProperties.Name="uip CLI path" ui:Ui.Placeholder="uip" />
+                            <TextBlock Text="Used when a preset also signs in the uip CLI. Default: uip, found in %AppData%\npm or on PATH."
+                                       Style="{StaticResource Text.Caption}" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,4,0,0">
+                        <Run Text="Presets (shared with the Studio extension):" />
+                        <LineBreak />
+                        <Run Text="{Binding PresetsPath, Mode=OneWay}" FontFamily="{DynamicResource SB.Font.Mono}" />
+                        <LineBreak />
+                        <Run Text="Settings, last result and switch log:" />
+                        <LineBreak />
+                        <Run Text="{Binding AppDataPath, Mode=OneWay}" FontFamily="{DynamicResource SB.Font.Mono}" />
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- About view -->
+                <StackPanel Visibility="{Binding View, Converter={StaticResource VisibleWhen}, ConverterParameter=About}">
+                    <DockPanel Style="{StaticResource SectionHeader}">
+                        <Button Style="{StaticResource Button.Icon}" Tag="{StaticResource Icon.Back}" Margin="0,0,8,0"
+                                Command="{Binding ShowPresetsCommand}" ToolTip="Back to presets" AutomationProperties.Name="Back to presets" />
+                        <TextBlock Text="About" Style="{StaticResource Text.Heading}" VerticalAlignment="Center" />
+                    </DockPanel>
+
+                    <Border Style="{StaticResource Card}" Padding="16,24">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Image Source="{DynamicResource App.Logo}" Width="64" Height="64" Margin="0,0,0,12"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                            <TextBlock Text="Tenant Switcher for UiPath" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding Version}" Style="{StaticResource Text.Caption}" HorizontalAlignment="Center" Margin="0,4,0,8" />
+                            <TextBlock Text="By Søren Schytz Birk" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock HorizontalAlignment="Center" Margin="0,4,0,0">
+                                <Hyperlink Command="{Binding OpenRepositoryCommand}">github.com/sorenbcoding/tenant-switcher-app</Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,4,0,12"
+                               Text="Switches the local UiPath Robot and Assistant between Orchestrator tenants. Formerly Orchestrator Connector. Shares presets with Tenant Switcher for UiPath Studio." />
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,0,0,12"
+                               Text="Tenant Switcher for UiPath is an independent open-source project by Søren Schytz Birk (github.com/sorenbcoding) and is not affiliated with, endorsed by, or sponsored by UiPath. UiPath and related names are trademarks of UiPath Inc." />
+                    <TextBlock Style="{StaticResource Text.Caption}" Text="MIT License. © 2026 Søren Schytz Birk." />
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Window>

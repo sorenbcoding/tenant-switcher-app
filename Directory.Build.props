@@ -1,0 +1,24 @@
+<Project>
+  <!-- Shared metadata for Tenant Switcher for UiPath (SorenB brand). -->
+  <PropertyGroup>
+    <Authors>Søren Schytz Birk</Authors>
+    <Company>Søren Schytz Birk</Company>
+    <Product>Tenant Switcher for UiPath</Product>
+    <Copyright>© 2026 Søren Schytz Birk</Copyright>
+    <Version>0.4.0</Version>
+    <Title>Tenant Switcher for UiPath</Title>
+    <Description>Switches the local UiPath Robot and Assistant between Orchestrator tenants. By Søren Schytz Birk · UiPath Community MVP. Independent project, not affiliated with UiPath.</Description>
+    <PackageProjectUrl>https://github.com/sorenbcoding/tenant-switcher-app</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sorenbcoding/tenant-switcher-app</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>See CHANGELOG.md</PackageReleaseNotes>
+  </PropertyGroup>
+  <!-- The app project takes the SorenB.TenantSwitcher ID; test projects keep their own names. -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'SorenB.TenantSwitcher'">
+    <RootNamespace>SorenB.TenantSwitcher</RootNamespace>
+    <AssemblyName>SorenB.TenantSwitcher</AssemblyName>
+    <PackageId>SorenB.TenantSwitcher</PackageId>
+    <AssemblyTitle>Tenant Switcher for UiPath</AssemblyTitle>
+  </PropertyGroup>
+</Project>
