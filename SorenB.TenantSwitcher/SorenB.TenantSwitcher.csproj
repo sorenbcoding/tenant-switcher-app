@@ -23,4 +23,19 @@
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.3" />
   </ItemGroup>
 
+  <!--
+    The assembly keeps the SorenB.TenantSwitcher ID; the published file gets the name users see
+    (the extension shows as "Tenant Switcher" in Studio). A single-file bundle reads itself from
+    its own path, so renaming it is safe.
+  -->
+  <PropertyGroup>
+    <PublishedExeName>Tenant Switcher</PublishedExeName>
+  </PropertyGroup>
+  <Target Name="RenamePublishedExe" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
+    <Move SourceFiles="$(PublishDir)$(AssemblyName).exe" DestinationFiles="$(PublishDir)$(PublishedExeName).exe" />
+    <Move SourceFiles="$(PublishDir)$(AssemblyName).pdb" DestinationFiles="$(PublishDir)$(PublishedExeName).pdb"
+          Condition="Exists('$(PublishDir)$(AssemblyName).pdb')" />
+    <Message Importance="high" Text="Published $(PublishDir)$(PublishedExeName).exe" />
+  </Target>
+
 </Project>

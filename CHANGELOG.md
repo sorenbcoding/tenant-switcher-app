@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Changed
+- The published executable is named `Tenant Switcher.exe`, matching the name the Studio extension shows in the activity bar. The assembly ID stays `SorenB.TenantSwitcher`.
+
 ## [0.4.0] - 2026-10-14
 
 ### Changed
