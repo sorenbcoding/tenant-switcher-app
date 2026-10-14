@@ -19,5 +19,6 @@
     <RootNamespace>SorenB.TenantSwitcher</RootNamespace>
     <AssemblyName>SorenB.TenantSwitcher</AssemblyName>
     <PackageId>SorenB.TenantSwitcher</PackageId>
+    <AssemblyTitle>Tenant Switcher for UiPath</AssemblyTitle>
   </PropertyGroup>
 </Project>

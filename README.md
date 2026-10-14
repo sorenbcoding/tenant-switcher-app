@@ -1,71 +1,118 @@
-# Orchestrator Connector
+<p align="center">
+  <img src="branding/tenant-switcher-app-light-128.png#gh-light-mode-only" width="96" alt="Tenant Switcher for UiPath logo">
+  <img src="branding/tenant-switcher-app-dark-128.png#gh-dark-mode-only" width="96" alt="Tenant Switcher for UiPath logo">
+</p>
 
-A small Windows utility for quickly switching which UiPath Orchestrator tenant your local UiPath Robot/Assistant is connected to. Save a preset per tenant (name, Orchestrator URL, Machine Client ID, Client Secret) and switch with one click, instead of reconfiguring the Robot by hand every time.
+<h1 align="center">Tenant Switcher for UiPath</h1>
+<p align="center">By Søren Schytz Birk</p>
 
-## Features
+Tenant Switcher for UiPath is a Windows app that switches the local UiPath Robot and Assistant between Orchestrator tenants in one step. It uses saved presets, each with an Orchestrator URL, a machine client ID and a client secret. It was formerly called *Orchestrator Connector*.
 
-- **Tenant presets** — save any number of Orchestrator connections, each with a custom name, Orchestrator URL, and Machine Client ID/Secret.
-- **One-click switch** — Connect disconnects the current tenant, connects to the selected preset, restarts the UiPath Robot service, and relaunches UiPath Assistant.
-- **Secrets stay out of plaintext files** — Client Secrets are stored in Windows Credential Manager, not in the presets file.
-- **No install footprint beyond .NET** — presets live under `%AppData%\OrchestratorConnector`; no database, no extra services.
+The Studio extension [Tenant Switcher for UiPath Studio](https://github.com/sorenbcoding/tenant-switcher-studio) does the same from inside UiPath Studio. The app and the extension share their presets.
 
-## Requirements
+## Install
 
-- Windows with UiPath Studio or Robot installed (the app shells out to `UiRobot.exe` and restarts the `UiPath Robot` Windows service).
-- [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) if running the framework-dependent build, or none if running a self-contained/single-file publish.
-- Permission to restart the `UiPath Robot` Windows service (may require running as administrator, depending on your machine's configuration).
+- Windows 10 or 11 with UiPath Studio, Robot or Assistant installed. This includes the per-user *UiPath Platform* install.
+- The [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
+- Download `SorenB.TenantSwitcher.exe` from [Releases](https://github.com/sorenbcoding/tenant-switcher-app/releases), or [build it from source](#building-and-publishing). It is a single file and needs no installer.
+- You also need a machine in Orchestrator that uses **client ID / client secret** credentials, either a machine template or a standard machine.
 
-## Usage
+**Upgrading from *Orchestrator Connector*:** your presets and secrets are kept.
 
-1. Fill in **Preset Name**, **Orchestrator URL**, **Client / Machine ID**, and **Client Secret**, then click **Add / Save**.
-   - Saving with a name that matches an existing preset overwrites that preset instead of creating a duplicate.
-2. Select a preset from the list, click **Edit** to load it back into the form (the Client Secret field is left blank — leave it blank to keep the stored secret, or type a new one to replace it).
-3. Select a preset and click **Delete** to remove it (this also removes its stored secret from Credential Manager).
-4. Select a preset and click **Connect** to switch: the app closes Assistant, disconnects the current tenant, connects to the selected one, restarts the Robot service, and reopens Assistant. Progress is shown in the status bar at the bottom.
+## Quick example
 
-## Where data is stored
+1. Start `SorenB.TenantSwitcher.exe` and select **Add preset**.
+2. Fill in the form:
+   - Name: `Acme production`
+   - URL: `https://cloud.uipath.com/acme/Production/orchestrator_`
+   - The machine's client ID and client secret.
+3. Select **Test** to check the credentials, then **Save**.
+4. Select **Connect** on the `Acme production` card, then **Switch**.
+5. The banner shows each step, then `Connected to 'Acme production'.` The card shows **Connected**.
 
-- Preset metadata (name, URL, Client ID) — `%AppData%\OrchestratorConnector\presets.json`
-- Client Secrets — Windows Credential Manager, one entry per preset (`OrchestratorConnector:{preset-id}`)
+## Reference
 
-If you're upgrading from a pre-1.0 version that stored everything (including the secret) in a single `presets.json` next to the executable, that file is migrated automatically the first time you run the new version: presets move to `%AppData%`, secrets move into Credential Manager, and the old plaintext file is deleted once the migration is verified.
+### Window
+Each preset has its own card in the window:
 
-## Building from source
+| Action | Where |
+|---|---|
+| Add a preset | **Add preset** opens a form with all fields |
+| Connect | **Connect** on a preset card |
+| Edit | the pencil icon on a card. Leave the client secret blank to keep the stored one. |
+| Test credentials | **Test** in the form. It requests a token with the values entered, without touching the Robot. |
+| Delete | the bin icon on a card. The stored secret is removed too. |
+| Settings, About | the icons in the top-right corner |
 
+**Confirmations** appear on the preset card. For example, *Do you want to switch tenant to Staging?* comes with **Switch** and **Cancel**.
+
+**Switch results** appear as a banner at the top of the window, with **Show log** and **OK**. A result stays until you select **OK**, including across restarts.
+
+**The connected preset** has an accent border and a green **Connected** label. Hover over a card to see its full URL and client ID.
+
+**Theme:** the window follows the Windows light or dark app theme. You can override this in Settings.
+
+### What a switch does
+1. **Checks the credentials.** The app requests a `client_credentials` token from the tenant's Identity Server. If the credentials are rejected, nothing changes. If Identity Server cannot be reached, the card offers **Switch anyway**.
+2. **Disconnects.** Closes UiPath Assistant and runs `UiRobot disconnect`.
+3. **Connects.** Runs `UiRobot connect --url … --clientId … --clientSecret …` and checks the exit code. If the connect fails, the previously connected preset is reconnected.
+4. **Restarts the `UiPath Robot` Windows service**, but only on service-mode installs that have one. Without administrator rights, Windows asks for elevation. Per-user installs skip this step.
+5. **Starts UiPath Assistant again.**
+6. **Signs in the uip CLI (optional, per preset).** Runs `uip login` with the same client credentials so the UiPath CLI targets the same tenant.
+
+Each step is written to `switch.log`. **Show log** opens it.
+
+### Settings
+| Setting | Default | Description |
+|---|---|---|
+| Theme | Use the Windows setting | Light, dark, or follow Windows. |
+| Ask before switching | on | Shows a confirmation on the card before the Robot is reconnected. |
+| Check the credentials before switching | on | Tests the credentials against Identity Server before disconnecting. |
+| Restart UiPath Assistant | on | Closes Assistant before the switch and starts it afterwards. |
+| UiRobot.exe path | *(empty)* | Full path to `UiRobot.exe`. When empty, the app looks for the per-user UiPath Platform install first, then Program Files. |
+| uip CLI path | `uip` | The `uip` command or its full path. |
+
+### Storage
+| Data | Location |
+|---|---|
+| Presets (name, URL, client ID) | `%AppData%\OrchestratorConnector\presets.json` |
+| Client secrets | Windows Credential Manager, target `OrchestratorConnector:<preset id>` |
+| Settings, connected preset, last result, uip sync option per preset | `%LocalAppData%\SorenB\TenantSwitcher\settings.json` and `state.json` |
+| Switch log | `%LocalAppData%\SorenB\TenantSwitcher\switch.log` |
+
+The preset and secret locations keep the `OrchestratorConnector` name on purpose. They are shared with the Studio extension, so a preset created in one tool appears in the other. The list reloads when the file changes.
+
+Early versions stored everything, including the secret, in a `presets.json` next to the executable. That file is migrated automatically on first start: presets move to `%AppData%` and secrets move to Credential Manager. The old file is deleted once the migration is verified.
+
+### Security
+- Client secrets are stored only in Windows Credential Manager.
+- Secrets are masked as `********` in the log and in step details.
+- The uip CLI receives the secret through an environment variable.
+- **Exception:** `UiRobot.exe` accepts the client secret only as a command-line argument. While `UiRobot connect` runs, any local process that can read other processes' command lines can see it.
+
+### Building and publishing
+```powershell
+dotnet build SorenB.TenantSwitcher.sln
+dotnet test SorenB.TenantSwitcher.sln
+dotnet publish SorenB.TenantSwitcher\SorenB.TenantSwitcher.csproj -c Release -o publish
 ```
-dotnet build OrchestratorConnector.sln
-```
 
-## Publishing a single-file executable
+`publish\SorenB.TenantSwitcher.exe` is the only file to distribute; you can delete the `.pdb`.
 
-```
-dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release -o publish
-```
+The exe in `bin\Release\…` is not the same file. It is the build-time apphost and needs the `.dll` and `.json` files next to it.
 
-This produces exactly one file to distribute: **`publish\Orchestrator Connector.exe`** (a couple of MB, plus a `.pdb` you can ignore/delete). That's the file to copy/move — it's fully self-contained as far as the app itself is concerned, needing only the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) installed on the machine it runs on.
+For a build that runs without the .NET runtime installed (about 150 MB), add `--self-contained true -p:IncludeNativeLibrariesForSelfExtract=true` to the publish command.
 
-> **Don't** grab the exe from `bin\Release\net8.0-windows\win-x64\` directly (without the `-o publish` flag, or from that intermediate folder) — that one is the build-time apphost and requires its companion `.dll`/`.json` files to sit right next to it. Moved alone, it does nothing when launched.
+## Changelog
 
-If you need a build with zero install requirements instead (fully self-contained, ~150 MB, runs with no .NET install at all), publish with:
-
-```
-dotnet publish OrchestratorConnector\OrchestratorConnector.csproj -c Release -o publish --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
-```
-
-## Project structure
-
-```
-OrchestratorConnector/
-  App.xaml(.cs)              Composition root / entry point
-  MainWindow.xaml(.cs)       Main window
-  Assets/                    App icon
-  Themes/                    UI styling
-  Models/                    Preset data model
-  Services/                  Persistence, Credential Manager access, UiPath process orchestration, migration
-  ViewModels/                MVVM view models and commands
-  Behaviors/                 PasswordBox data-binding support
-```
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
+
+---
+
+By Søren Schytz Birk · UiPath Community MVP · [github.com/sorenbcoding](https://github.com/sorenbcoding)
+
+Tenant Switcher for UiPath is an independent open-source project by Søren Schytz Birk (github.com/sorenbcoding) and is not affiliated with, endorsed by, or sponsored by UiPath. UiPath and related names are trademarks of UiPath Inc.
