@@ -19,7 +19,7 @@ public partial class App : Application
         // MigrationService would otherwise deadlock against the WPF dispatcher.
         await Task.Run(() => MigrationService.TryMigrateLegacyPresets(AppContext.BaseDirectory, presetStore));
 
-        var switcher = new TenantSwitchService();
+        var switcher = new TenantSwitchService(new IdentityClient(), new SwitchLog());
         var viewModel = new MainViewModel(presetStore, switcher);
         await viewModel.LoadAsync();
 

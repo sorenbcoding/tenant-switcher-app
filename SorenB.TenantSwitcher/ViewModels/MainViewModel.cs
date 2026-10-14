@@ -22,7 +22,6 @@ public sealed class MainViewModel : ViewModelBase
     {
         _store = store;
         _switcher = switcher;
-        _switcher.ProgressChanged += (_, progress) => StatusMessage = progress.Message;
 
         SaveCommand = new RelayCommand(_ => SavePreset());
         EditCommand = new RelayCommand(_ => LoadSelectedIntoEditFields(), _ => SelectedPreset is not null);
@@ -172,17 +171,20 @@ public sealed class MainViewModel : ViewModelBase
             return;
         }
 
-        var secret = CredentialService.TryReadSecret(SelectedPreset.Id);
-        if (secret is null)
+        var settings = new AppSettings();
+        var preflight = await _switcher.PreflightAsync(SelectedPreset.ToModel(), settings);
+        if (preflight.Status == PreflightStatus.Blocked)
         {
-            StatusMessage = "No stored secret for this preset - edit it and re-enter the Client Secret.";
+            StatusMessage = preflight.Message;
             return;
         }
 
         IsBusy = true;
         try
         {
-            await _switcher.SwitchAsync(SelectedPreset.ToModel(), secret);
+            var progress = new Progress<string>(step => StatusMessage = step + "…");
+            var result = await _switcher.SwitchAsync(new SwitchRequest(SelectedPreset.ToModel(), null, settings, false), progress);
+            StatusMessage = result.Message;
         }
         finally
         {
