@@ -8,13 +8,13 @@
 
 Tenant Switcher for UiPath is a Windows app that switches the local UiPath Robot and Assistant between Orchestrator tenants in one step. It uses saved presets, each with an Orchestrator URL, a machine client ID and a client secret. It was formerly called *Orchestrator Connector*.
 
-The Studio extension [Tenant Switcher for UiPath Studio](https://github.com/sorenbcoding/tenant-switcher-studio) does the same from inside UiPath Studio. The app and the extension share their presets.
+Its sibling, the Studio extension [Tenant Switcher for UiPath Studio](https://github.com/sorenbcoding/tenant-switcher-studio), does the same from inside UiPath Studio. The two share their presets and both show the tenant the Robot is actually connected to.
 
 ## Install
 
 - Windows 10 or 11 with UiPath Studio, Robot or Assistant installed. This includes the per-user *UiPath Platform* install.
 - The [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
-- Download `Tenant Switcher.exe` from [Releases](https://github.com/sorenbcoding/tenant-switcher-app/releases), or [build it from source](#building-and-publishing). It is a single file and needs no installer.
+- Download `sorenb-tenant-switcher-<version>.zip` from [Releases](https://github.com/sorenbcoding/tenant-switcher-app/releases) and extract `Tenant Switcher.exe`, or [build it from source](#building-and-publishing). It is a single file and needs no installer.
 - You also need a machine in Orchestrator that uses **client ID / client secret** credentials, either a machine template or a standard machine.
 
 **Upgrading from *Orchestrator Connector*:** your presets and secrets are kept.
@@ -48,17 +48,17 @@ Each preset has its own card in the window:
 
 **Switch results** appear as a banner at the top of the window, with **Show log** and **OK**. A result stays until you select **OK**, including across restarts.
 
-**The connected preset** has an accent border and a green **Connected** label. Hover over a card to see its full URL and client ID.
+**The connected preset** has a slate border and a green **Connected** label. Hover over a card to see its full URL and client ID.
 
-The connected preset comes from the Robot itself, so it is correct whichever tool made the switch. It updates live when the Robot's connection changes, for example after a switch in the Studio extension. If the Robot is connected to a tenant without a preset, a note under **Add preset** says so.
+The connected preset is read from the Robot's own `UiPath.settings`, so it is correct whichever tool made the switch. The window updates live when that file changes, so a switch made in the Studio extension shows up here too. If the Robot is connected to a tenant without a preset, a note under **Add preset** says so.
 
 **Theme:** the window follows the Windows light or dark app theme. You can override this in Settings.
 
 ### What a switch does
 1. **Checks the credentials.** The app requests a `client_credentials` token from the tenant's Identity Server. If the credentials are rejected, nothing changes. If Identity Server cannot be reached, the card offers **Switch anyway**.
 2. **Disconnects.** Closes UiPath Assistant and runs `UiRobot disconnect`.
-3. **Connects.** Runs `UiRobot connect --url … --clientId … --clientSecret …` and checks the exit code. If the connect fails, the previously connected preset is reconnected.
-4. **Restarts the `UiPath Robot` Windows service**, but only on service-mode installs that have one. Without administrator rights, Windows asks for elevation. Per-user installs skip this step.
+3. **Connects.** Runs `UiRobot connect --url … --clientId … --clientSecret …` and checks the exit code. If the connect fails, the tenant the Robot was connected to before is reconnected.
+4. **Restarts the `UiPath Robot` Windows service**, but only if one exists (service-mode installs). Without administrator rights, Windows asks for elevation. Per-user installs skip this step.
 5. **Starts UiPath Assistant again.**
 6. **Signs in the uip CLI (optional, per preset).** Runs `uip login` with the same client credentials so the UiPath CLI targets the same tenant.
 
@@ -83,7 +83,7 @@ Each step is written to `switch.log`. **Show log** opens it.
 | Switch log | `%LocalAppData%\SorenB\TenantSwitcher\switch.log` |
 | Connected tenant (read only) | the Robot's `UiPath.settings`, key `UiPathServerUrl`: `%AppData%\UiPath` (user mode) or `%ProgramData%\UiPath` (service mode) |
 
-The preset and secret locations keep the `OrchestratorConnector` name on purpose. They are shared with the Studio extension, so a preset created in one tool appears in the other. The list reloads when the file changes.
+The preset and secret locations keep the `OrchestratorConnector` name on purpose. They are shared with the [Tenant Switcher for UiPath Studio](https://github.com/sorenbcoding/tenant-switcher-studio) extension, so a preset created in one tool appears in the other. The list reloads when the file changes. The uip sync option is stored per tool.
 
 Early versions stored everything, including the secret, in a `presets.json` next to the executable. That file is migrated automatically on first start: presets move to `%AppData%` and secrets move to Credential Manager. The old file is deleted once the migration is verified.
 
