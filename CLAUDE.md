@@ -15,7 +15,9 @@ WPF desktop app (.NET 8, `net8.0-windows`) for switching the local UiPath Robot 
 - **Do not rename the shared store.** Keep `%AppData%\OrchestratorConnector\presets.json` (bare array, PascalCase keys), `preset-meta.json` beside it, and the Credential Manager target `OrchestratorConnector:<guid>`. They are shared with the Studio extension.
 - App-only state (settings, last switch, log) lives in `%LocalAppData%\SorenB\TenantSwitcher\`.
 - The connected tenant comes from the Robot's `UiPath.settings` (`UiPathServerUrl`; `%AppData%\UiPath`, or `%ProgramData%\UiPath` in service mode), watched live in `Services/RobotConnection.cs`. The extension reads the same file. Never write to it.
+- Assistant's `%AppData%\UiPath\agent-settings.json` belongs to Assistant. Read it freely; only `Services/AssistantSettings.cs` may change `agent.showStartMenuShortcuts` to `false`, while Assistant is closed and only when the user chose to. Never turn it back on: Assistant then rewrites all its Start menu shortcuts, which can freeze Windows Explorer.
 - Flat UI: no shadows, no gradients, no orange. Accent is `App.Accent` (slate) only.
+- Every change starts from a GitHub issue and goes on its own branch: `fix/<issue>-<slug>`, `feature/<issue>-<slug>`, `docs/…` or `release/v<version>`. End each commit subject with the issue key, e.g. `(#11)`. Commit small steps, then open a PR whose body says `Closes #<issue>`, merge it with a merge commit and delete the branch. Changes shared with the Studio extension get an issue in both repos, cross-linked.
 
 ## Commands
 `dotnet build SorenB.TenantSwitcher.sln`, `dotnet test`, `dotnet publish SorenB.TenantSwitcher -c Release -o publish` (produces `publish\Tenant Switcher.exe`). Brand check: `python ~/.claude/skills/sorenb-brand/scripts/brand_check.py . --category app`.
