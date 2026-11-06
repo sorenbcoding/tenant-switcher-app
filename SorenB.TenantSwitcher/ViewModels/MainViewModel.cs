@@ -233,7 +233,8 @@ public sealed class MainViewModel : ViewModelBase
         card.SetPrompt(kind, message);
     }
 
-    internal async Task ConfirmPromptAsync(PresetCardViewModel card)
+    /// <param name="secondary">The prompt's second button ("Switch anyway" on the Start menu prompt).</param>
+    internal async Task ConfirmPromptAsync(PresetCardViewModel card, bool secondary = false)
     {
         switch (card.Prompt)
         {
@@ -245,11 +246,29 @@ public sealed class MainViewModel : ViewModelBase
                 await DeleteAsync(card);
                 break;
             case PromptKind.Unverified:
-                // "Switch anyway" skips the checks.
+                // "Switch anyway" skips the credential checks.
+                await WarnOrSwitchAsync(card);
+                break;
+            case PromptKind.StartMenu:
+                var turnOff = card.CanTurnOff && !secondary;
                 card.SetPrompt(PromptKind.None);
-                await SwitchAsync(card.Preset);
+                await SwitchAsync(card.Preset, turnOff);
                 break;
         }
+    }
+
+    /// <summary>Asks about Assistant's Start menu shortcuts first when they are on; otherwise switches.</summary>
+    private async Task WarnOrSwitchAsync(PresetCardViewModel card)
+    {
+        var canTurnOff = TenantSwitchService.StartMenuWarning(Settings.Model);
+        if (canTurnOff is not null)
+        {
+            card.SetPrompt(PromptKind.StartMenu, canTurnOff: canTurnOff.Value);
+            return;
+        }
+
+        card.SetPrompt(PromptKind.None);
+        await SwitchAsync(card.Preset);
     }
 
     private async Task PreflightAndSwitchAsync(PresetCardViewModel card)
@@ -278,13 +297,12 @@ public sealed class MainViewModel : ViewModelBase
                 card.SetPrompt(PromptKind.Unverified, preflight.Message);
                 break;
             default:
-                card.SetPrompt(PromptKind.None);
-                await SwitchAsync(card.Preset);
+                await WarnOrSwitchAsync(card);
                 break;
         }
     }
 
-    private async Task SwitchAsync(Preset target)
+    private async Task SwitchAsync(Preset target, bool turnOffStartMenuShortcuts = false)
     {
         // The tenant to roll back to is whatever the Robot is connected to now, even if the extension switched to it.
         var current = RobotConnection.ResolveActive(_presets, _robot.ReadServerUrl(), _state.ActivePresetId);
@@ -303,7 +321,8 @@ public sealed class MainViewModel : ViewModelBase
             _switchStep = step;
             RefreshBanners();
         });
-        var result = await _switcher.SwitchAsync(new SwitchRequest(target, previous, Settings.Model, syncUip), progress);
+        var result = await _switcher.SwitchAsync(
+            new SwitchRequest(target, previous, Settings.Model, syncUip, turnOffStartMenuShortcuts && Settings.RestartAssistant), progress);
 
         if (result.Success)
         {

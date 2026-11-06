@@ -183,6 +183,9 @@
                         <WrapPanel Visibility="{Binding HasPromptButtons, Converter={StaticResource VisibleWhen}}">
                             <Button Content="{Binding PromptPrimaryText}" Style="{StaticResource Button.Primary}" Margin="0,0,8,0"
                                     Command="{Binding PromptPrimaryCommand}" />
+                            <Button Content="Switch anyway" Style="{StaticResource Button.Secondary}" Margin="0,0,8,0"
+                                    Command="{Binding PromptSecondaryCommand}"
+                                    Visibility="{Binding HasPromptSecondary, Converter={StaticResource VisibleWhen}}" />
                             <Button Content="Cancel" Style="{StaticResource Button.Secondary}" Command="{Binding PromptCancelCommand}" />
                         </WrapPanel>
                     </StackPanel>
@@ -281,6 +284,9 @@
                                        Style="{StaticResource Text.Caption}" Margin="24,4,0,12" />
                             <CheckBox Content="Restart UiPath Assistant" IsChecked="{Binding RestartAssistant}" />
                             <TextBlock Text="Closes Assistant before the switch and starts it again afterwards, so it shows the new tenant. Default: on."
+                                       Style="{StaticResource Text.Caption}" Margin="24,4,0,12" />
+                            <CheckBox Content="Warn about Assistant's Start menu shortcuts" IsChecked="{Binding WarnAboutStartMenuShortcuts}" />
+                            <TextBlock Text="Warns before switching when Assistant's Show in Windows Start Menu is on. Assistant then rewrites all its Start menu shortcuts, which can freeze Windows Explorer. Default: on."
                                        Style="{StaticResource Text.Caption}" Margin="24,4,0,0" />
                         </StackPanel>
                     </Border>
