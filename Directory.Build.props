@@ -5,7 +5,7 @@
     <Company>Søren Schytz Birk</Company>
     <Product>Tenant Switcher for UiPath</Product>
     <Copyright>© 2026 Søren Schytz Birk</Copyright>
-    <Version>0.4.0</Version>
+    <Version>0.4.1</Version>
     <Title>Tenant Switcher for UiPath</Title>
     <Description>Switches the local UiPath Robot and Assistant between Orchestrator tenants. By Søren Schytz Birk · UiPath Community MVP. Independent project, not affiliated with UiPath.</Description>
     <PackageProjectUrl>https://github.com/sorenbcoding/tenant-switcher-app</PackageProjectUrl>
