@@ -17,7 +17,8 @@ public enum PreflightStatus
 public sealed record Preflight(PreflightStatus Status, string Message = "", bool OpenSettings = false);
 
 /// <summary>Everything one switch needs; resolved by the caller from settings and app state.</summary>
-public sealed record SwitchRequest(Preset Target, Preset? Previous, AppSettings Settings, bool SyncUipCli);
+/// <param name="TurnOffStartMenuShortcuts">Turn off Assistant's Show in Windows Start Menu while Assistant is closed (only with RestartAssistant).</param>
+public sealed record SwitchRequest(Preset Target, Preset? Previous, AppSettings Settings, bool SyncUipCli, bool TurnOffStartMenuShortcuts = false);
 
 /// <summary>
 /// Switches the local Robot to another tenant. Runs the same steps as the Studio extension's
@@ -89,6 +90,15 @@ public sealed class TenantSwitchService
         return new(PreflightStatus.Ready);
     }
 
+    /// <summary>
+    /// Whether to warn that Assistant's Start menu shortcuts are on: null for no warning, else whether
+    /// the switch can turn them off (only when it closes Assistant, so the file is not written under it).
+    /// </summary>
+    public static bool? StartMenuWarning(AppSettings settings, string? assistantSettingsPath = null) =>
+        settings.WarnAboutStartMenuShortcuts && AssistantSettings.ReadShowStartMenuShortcuts(assistantSettingsPath) == true
+            ? settings.RestartAssistant
+            : null;
+
     /// <summary>Runs the switch. Never throws; failures are reported in the result.</summary>
     /// <param name="progress">Receives the name of each step as it starts.</param>
     public async Task<SwitchResult> SwitchAsync(SwitchRequest request, IProgress<string>? progress = null)
@@ -149,6 +159,14 @@ public sealed class TenantSwitchService
                     var closed = CloseAssistant();
                     Add("Close Assistant", closed > 0 ? StepOutcome.Ok : StepOutcome.Skipped,
                         closed > 0 ? $"{closed} process(es) closed" : "Assistant was not running");
+
+                    // 1b. Turn off Assistant's Start menu shortcuts, if the user asked. Rewriting them for the new
+                    //     tenant can freeze Windows Explorer. Assistant must be closed, or it may overwrite the file.
+                    if (_request.TurnOffStartMenuShortcuts)
+                    {
+                        Begin("Turn off Start menu shortcuts");
+                        TurnOffStartMenuShortcuts();
+                    }
                 }
 
                 // 2. Disconnect. A non-zero exit usually means "already disconnected", so it is only a warning.
@@ -258,6 +276,44 @@ public sealed class TenantSwitchService
             }
 
             return processes.Length;
+        }
+
+        private void TurnOffStartMenuShortcuts()
+        {
+            const string step = "Turn off Start menu shortcuts";
+            const string manually = "Turn off Show in Windows Start Menu in Assistant > Preferences.";
+            var running = Process.GetProcessesByName(AssistantProcessName);
+            foreach (var process in running)
+            {
+                process.Dispose();
+            }
+
+            if (running.Length > 0)
+            {
+                Add(step, StepOutcome.Warning, $"Assistant is still running, so its settings were not changed. {manually}");
+                return;
+            }
+
+            try
+            {
+                var path = AssistantSettings.DefaultPath;
+                switch (AssistantSettings.DisableStartMenuShortcuts(path))
+                {
+                    case StartMenuChange.Changed:
+                        Add(step, StepOutcome.Ok, $"Show in Windows Start Menu is now off in {path}");
+                        break;
+                    case StartMenuChange.Unchanged:
+                        Add(step, StepOutcome.Skipped, "Show in Windows Start Menu was already off");
+                        break;
+                    default:
+                        Add(step, StepOutcome.Skipped, $"No Assistant settings file at {path}");
+                        break;
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Text.Json.JsonException)
+            {
+                Add(step, StepOutcome.Warning, $"Could not change Assistant's settings: {ex.Message} {manually}");
+            }
         }
 
         private (int Code, string Output) Connect(string uiRobot, Preset preset)

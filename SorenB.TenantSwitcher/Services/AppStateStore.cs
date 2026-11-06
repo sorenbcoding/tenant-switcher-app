@@ -19,6 +19,7 @@ public sealed class AppSettings
     public bool ConfirmBeforeSwitch { get; set; } = true;
     public bool ValidateBeforeSwitch { get; set; } = true;
     public bool RestartAssistant { get; set; } = true;
+    public bool WarnAboutStartMenuShortcuts { get; set; } = true;
     public string UiRobotPath { get; set; } = string.Empty;
     public string UipCliPath { get; set; } = "uip";
 }
