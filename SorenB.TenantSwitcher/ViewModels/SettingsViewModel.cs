@@ -58,6 +58,12 @@ public sealed class SettingsViewModel : ViewModelBase
         set => Update(() => Model.RestartAssistant = value);
     }
 
+    public bool WarnAboutStartMenuShortcuts
+    {
+        get => Model.WarnAboutStartMenuShortcuts;
+        set => Update(() => Model.WarnAboutStartMenuShortcuts = value);
+    }
+
     public string UiRobotPath
     {
         get => Model.UiRobotPath;

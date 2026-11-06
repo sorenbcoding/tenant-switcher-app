@@ -56,7 +56,7 @@ The connected preset is read from the Robot's own `UiPath.settings`, so it is co
 
 ### What a switch does
 1. **Checks the credentials.** The app requests a `client_credentials` token from the tenant's Identity Server. If the credentials are rejected, nothing changes. If Identity Server cannot be reached, the card offers **Switch anyway**.
-2. **Disconnects.** Closes UiPath Assistant and runs `UiRobot disconnect`.
+2. **Disconnects.** Closes UiPath Assistant and runs `UiRobot disconnect`. If you chose **Turn off and switch** (see [Troubleshooting](#troubleshooting)), Assistant's *Show in Windows Start Menu* is turned off while Assistant is closed.
 3. **Connects.** Runs `UiRobot connect --url … --clientId … --clientSecret …` and checks the exit code. If the connect fails, the tenant the Robot was connected to before is reconnected.
 4. **Restarts the `UiPath Robot` Windows service**, but only if one exists (service-mode installs). Without administrator rights, Windows asks for elevation. Per-user installs skip this step.
 5. **Starts UiPath Assistant again.**
@@ -71,6 +71,7 @@ Each step is written to `switch.log`. **Show log** opens it.
 | Ask before switching | on | Shows a confirmation on the card before the Robot is reconnected. |
 | Check the credentials before switching | on | Tests the credentials against Identity Server before disconnecting. |
 | Restart UiPath Assistant | on | Closes Assistant before the switch and starts it afterwards. |
+| Warn about Assistant's Start menu shortcuts | on | Warns before switching when Assistant's *Show in Windows Start Menu* is on. See [Troubleshooting](#troubleshooting). |
 | UiRobot.exe path | *(empty)* | Full path to `UiRobot.exe`. When empty, the app looks for the per-user UiPath Platform install first, then Program Files. |
 | uip CLI path | `uip` | The `uip` command or its full path. |
 
@@ -82,6 +83,7 @@ Each step is written to `switch.log`. **Show log** opens it.
 | Settings, connected preset, last result, uip sync option per preset | `%LocalAppData%\SorenB\TenantSwitcher\settings.json` and `state.json` |
 | Switch log | `%LocalAppData%\SorenB\TenantSwitcher\switch.log` |
 | Connected tenant (read only) | the Robot's `UiPath.settings`, key `UiPathServerUrl`: `%AppData%\UiPath` (user mode) or `%ProgramData%\UiPath` (service mode) |
+| Assistant's Start menu setting | `%AppData%\UiPath\agent-settings.json`, key `agent.showStartMenuShortcuts`. Read before each switch; changed only when you choose **Turn off and switch**. |
 
 The preset and secret locations keep the `OrchestratorConnector` name on purpose. They are shared with the [Tenant Switcher for UiPath Studio](https://github.com/sorenbcoding/tenant-switcher-studio) extension, so a preset created in one tool appears in the other. The list reloads when the file changes. The uip sync option is stored per tool.
 
@@ -92,6 +94,14 @@ Early versions stored everything, including the secret, in a `presets.json` next
 - Secrets are masked as `********` in the log and in step details.
 - The uip CLI receives the secret through an environment variable.
 - **Exception:** `UiRobot.exe` accepts the client secret only as a command-line argument. While `UiRobot connect` runs, any local process that can read other processes' command lines can see it.
+
+### Troubleshooting
+**Windows Explorer stops responding after a switch.** Win+E, Alt+Tab and taskbar clicks do nothing, and File Explorer windows don't open. This happens when UiPath Assistant's **Preferences → Show in Windows Start Menu** is on. Assistant keeps one Start menu shortcut per automation and rewrites them all when it connects to another tenant. With access to many folders that is hundreds of shortcuts, and Windows Explorer can stop handling input while it processes them.
+
+- **Fix:** turn off *Show in Windows Start Menu* in Assistant. When it is on, the card warns before a switch and offers **Turn off and switch**, which changes that one setting while Assistant is closed. When **Restart UiPath Assistant** is off, change it in Assistant yourself.
+- **Once Explorer has frozen:** restart Windows Explorer from Task Manager.
+- Turning the setting off makes Assistant remove its shortcuts, which can freeze Explorer once more.
+- To keep the setting and stop the warning, turn off **Warn about Assistant's Start menu shortcuts** in Settings.
 
 ### Building and publishing
 ```powershell
