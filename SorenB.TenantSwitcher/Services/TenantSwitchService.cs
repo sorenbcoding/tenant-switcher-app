@@ -145,18 +145,49 @@ public sealed class TenantSwitchService
 
         public SwitchResult Execute()
         {
+            string? assistant = null;
+            var assistantClosed = false;
             try
             {
                 Log($"Switching to '{Target.PresetName}' ({Target.OrchestratorUrl})");
                 var uiRobot = UiPathLocator.FindUiRobotExe(Settings.UiRobotPath)
                     ?? throw new InvalidOperationException("UiRobot.exe was not found. Set the UiRobot.exe path in Settings.");
-                var assistant = UiPathLocator.FindAssistantExe();
+                assistant = UiPathLocator.FindAssistantExe();
+
+                // 0. Read the secrets before anything changes: a missing target secret must not leave the Robot
+                //    disconnected. A missing previous secret only rules out the rollback.
+                string targetSecret;
+                try
+                {
+                    targetSecret = ReadSecret(Target)
+                        ?? throw new InvalidOperationException(
+                            $"No client secret is stored for preset '{Target.PresetName}'. Edit the preset and enter the client secret.");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Add("Read client secret", StepOutcome.Failed, ex.Message);
+                    return Finish(false, $"{ex.Message} The Robot was not changed.", rolledBack: false);
+                }
+
+                string? previousSecret = null;
+                if (_request.Previous is { } prev)
+                {
+                    try
+                    {
+                        previousSecret = ReadSecret(prev);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Log($"No rollback possible: {ex.Message}");
+                    }
+                }
 
                 // 1. Close Assistant so it reconnects cleanly afterwards.
                 if (Settings.RestartAssistant)
                 {
                     Begin("Close Assistant");
                     var closed = CloseAssistant();
+                    assistantClosed = closed > 0;
                     Add("Close Assistant", closed > 0 ? StepOutcome.Ok : StepOutcome.Skipped,
                         closed > 0 ? $"{closed} process(es) closed" : "Assistant was not running");
 
@@ -174,9 +205,20 @@ public sealed class TenantSwitchService
                 var r = Run(uiRobot, new[] { "disconnect" }, RobotTimeout);
                 Add("Disconnect Robot", r.Code == 0 ? StepOutcome.Ok : StepOutcome.Warning, $"exit {r.Code} {r.Output}");
 
-                // 3. Connect to the target tenant, rolling back to the previous one on failure.
+                // 3. Connect to the target tenant, rolling back to the previous one on failure. An exception
+                //    (UiRobot could not be started) counts as a failed connect, so it rolls back too.
                 Begin("Connect Robot");
-                r = Connect(uiRobot, Target);
+                string? connectError = null;
+                try
+                {
+                    r = Connect(uiRobot, Target, targetSecret);
+                }
+                catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
+                {
+                    r = (-1, ex.Message);
+                    connectError = ex.Message;
+                }
+
                 if (r.Code == 0)
                 {
                     Add("Connect Robot", StepOutcome.Ok, Target.OrchestratorUrl);
@@ -185,7 +227,9 @@ public sealed class TenantSwitchService
                 {
                     Add("Connect Robot", StepOutcome.Failed, $"exit {r.Code} {r.Output}");
                     var output = r.Output.Length > 0 ? r.Output.TrimEnd('.') : "no output";
-                    var reason = $"UiRobot connect returned exit code {r.Code} ({output}).";
+                    var reason = connectError is not null
+                        ? $"UiRobot connect could not run ({connectError.TrimEnd('.')})."
+                        : $"UiRobot connect returned exit code {r.Code} ({output}).";
                     var rolledBack = false;
                     var previous = _request.Previous;
                     if (previous is not null)
@@ -194,7 +238,7 @@ public sealed class TenantSwitchService
                         Begin(step);
                         try
                         {
-                            var rb = Connect(uiRobot, previous);
+                            var rb = Connect(uiRobot, previous, previousSecret);
                             rolledBack = rb.Code == 0;
                             Add(step, rolledBack ? StepOutcome.Ok : StepOutcome.Failed,
                                 rolledBack ? previous.OrchestratorUrl : $"exit {rb.Code} {rb.Output}");
@@ -252,6 +296,13 @@ public sealed class TenantSwitchService
             catch (Exception ex)
             {
                 Add("Unexpected error", StepOutcome.Failed, ex.Message);
+
+                // Don't leave the user without Assistant because of an error after it was closed.
+                if (assistantClosed && assistant is not null)
+                {
+                    TryStart(assistant);
+                }
+
                 return Finish(false, ex.Message, rolledBack: false);
             }
         }
@@ -316,16 +367,26 @@ public sealed class TenantSwitchService
             }
         }
 
-        private (int Code, string Output) Connect(string uiRobot, Preset preset)
+        /// <summary>The stored client secret (masked in the log from now on), or null when none is stored.</summary>
+        private string? ReadSecret(Preset preset)
         {
             var secret = CredentialService.TryReadSecret(preset.Id);
             if (string.IsNullOrEmpty(secret))
             {
-                throw new InvalidOperationException(
-                    $"No client secret is stored for preset '{preset.PresetName}'. Edit the preset and enter the client secret.");
+                return null;
             }
 
             _secrets.Add(secret);
+            return secret;
+        }
+
+        private (int Code, string Output) Connect(string uiRobot, Preset preset, string? secret)
+        {
+            if (string.IsNullOrEmpty(secret))
+            {
+                throw new InvalidOperationException($"No client secret is stored for preset '{preset.PresetName}'.");
+            }
+
             return Run(uiRobot, new[] { "connect", "--url", preset.OrchestratorUrl, "--clientId", preset.ClientId, "--clientSecret", secret }, RobotTimeout);
         }
 
