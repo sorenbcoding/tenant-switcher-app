@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Fixed
+- When connecting failed with an error instead of an exit code, for example because UiRobot couldn't be started, the switch skipped the rollback and left the Robot disconnected and Assistant closed. Such errors now roll back to the previous tenant like a failed connect. A missing client secret is now found before the Robot is disconnected. ([#16](https://github.com/sorenbcoding/tenant-switcher-app/issues/16))
+
 ## [0.4.1] - 2026-11-06
 
 ### Fixed
