@@ -28,7 +28,8 @@ public sealed class IdentityClient
 
     public IdentityClient(HttpMessageHandler? handler = null)
     {
-        _http = handler is null ? new HttpClient() : new HttpClient(handler);
+        // A token endpoint never redirects; following one could land on a proxy's sign-in page.
+        _http = new HttpClient(handler ?? new HttpClientHandler { AllowAutoRedirect = false });
         _http.Timeout = TimeSpan.FromSeconds(15);
     }
 
@@ -68,9 +69,17 @@ public sealed class IdentityClient
 
         using (response)
         {
+            // Only an actual token proves the credentials; any 2xx page (proxy, captive portal) does not.
             if (response.IsSuccessStatusCode)
             {
-                return new(ValidationStatus.Ok);
+                return await HasAccessTokenAsync(response, ct).ConfigureAwait(false)
+                    ? new(ValidationStatus.Ok)
+                    : NoToken(endpoint, $"answered HTTP {(int)response.StatusCode}");
+            }
+
+            if ((int)response.StatusCode is >= 300 and < 400)
+            {
+                return NoToken(endpoint, $"redirected (HTTP {(int)response.StatusCode})");
             }
 
             var (error, description) = await ReadErrorAsync(response, ct).ConfigureAwait(false);
@@ -90,6 +99,26 @@ public sealed class IdentityClient
 
             var suffix = error.Length > 0 ? $" ({error}{(description.Length > 0 ? ": " + description : "")})" : "";
             return new(ValidationStatus.Unknown, $"Unexpected response from {endpoint} — HTTP {(int)response.StatusCode}{suffix}.");
+        }
+    }
+
+    private static ValidationResult NoToken(string endpoint, string what) =>
+        new(ValidationStatus.Unknown,
+            $"{endpoint} {what} instead of issuing a token, so the credentials could not be checked. A proxy or sign-in page may be in the way.");
+
+    private static async Task<bool> HasAccessTokenAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+            return doc.RootElement.ValueKind == JsonValueKind.Object
+                && doc.RootElement.TryGetProperty("access_token", out var token)
+                && token.ValueKind == JsonValueKind.String
+                && token.GetString()!.Length > 0;
+        }
+        catch (Exception ex) when (ex is JsonException or HttpRequestException)
+        {
+            return false;
         }
     }
 

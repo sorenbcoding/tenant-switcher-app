@@ -67,6 +67,36 @@ public class IdentityClientTests
         Assert.Equal(ValidationStatus.Unknown, r3.Status);
     }
 
+    [Theory]
+    [InlineData(HttpStatusCode.OK, "<html>Sign in</html>")]
+    [InlineData(HttpStatusCode.OK, "{}")]
+    [InlineData(HttpStatusCode.OK, "{\"access_token\":\"\"}")]
+    [InlineData(HttpStatusCode.OK, "null")]
+    [InlineData(HttpStatusCode.NoContent, "")]
+    public async Task Accepts_a_success_response_only_with_an_access_token(HttpStatusCode status, string body)
+    {
+        var result = await new IdentityClient(Respond(status, body)).ValidateAsync(Url, "id", "s");
+
+        Assert.Equal(ValidationStatus.Unknown, result.Status);
+        Assert.Contains("A proxy or sign-in page may be in the way.", result.Message);
+    }
+
+    [Fact]
+    public async Task Reports_a_redirect_as_unverified()
+    {
+        var handler = new FakeHandler(_ =>
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.Found) { Content = new StringContent("") };
+            response.Headers.Location = new Uri("https://proxy.example/login");
+            return response;
+        });
+
+        var result = await new IdentityClient(handler).ValidateAsync(Url, "id", "s");
+
+        Assert.Equal(ValidationStatus.Unknown, result.Status);
+        Assert.Contains("redirected (HTTP 302)", result.Message);
+    }
+
     [Fact]
     public async Task Rejects_unparseable_url()
     {
