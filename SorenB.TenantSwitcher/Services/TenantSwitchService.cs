@@ -118,6 +118,13 @@ public sealed class TenantSwitchService
         }
     }
 
+    /// <summary>
+    /// Whether UiRobot output is its refusal to disconnect while a process runs
+    /// ("Cannot perform action while there are any processes running on any of the Robots configured.").
+    /// </summary>
+    public static bool IsProcessRunningError(string output) =>
+        output.Contains("processes running", StringComparison.OrdinalIgnoreCase);
+
     private static SwitchResult Fail(Preset target, IReadOnlyList<SwitchStep> steps, string message, bool rolledBack) =>
         new(target.Id, target.PresetName, false, rolledBack, ResultSeverity.Error,
             $"The switch to \"{target.PresetName}\" failed — {message}", steps, DateTimeOffset.Now);
@@ -201,8 +208,24 @@ public sealed class TenantSwitchService
                 }
 
                 // 2. Disconnect. A non-zero exit usually means "already disconnected", so it is only a warning.
+                //    Except while a process runs: UiRobot then refuses and the Robot stays connected, so a connect
+                //    would only fail with "Orchestrator already connected!". Stop here and leave the Robot as it is.
                 Begin("Disconnect Robot");
                 var r = Run(uiRobot, new[] { "disconnect" }, RobotTimeout);
+                if (r.Code != 0 && IsProcessRunningError(r.Output))
+                {
+                    Add("Disconnect Robot", StepOutcome.Failed, $"exit {r.Code} {r.Output}");
+                    if (assistantClosed && assistant is not null)
+                    {
+                        TryStart(assistant);
+                    }
+
+                    var current = _request.Previous is { } p ? $"'{p.PresetName}'" : "its current tenant";
+                    return Finish(false,
+                        $"A process is running on the Robot, and UiRobot does not disconnect while a process runs, so the Robot is still connected to {current}. Wait for the process to finish or stop it in UiPath Assistant, then switch again.",
+                        rolledBack: true); // the Robot never left its tenant
+                }
+
                 Add("Disconnect Robot", r.Code == 0 ? StepOutcome.Ok : StepOutcome.Warning, $"exit {r.Code} {r.Output}");
 
                 // 3. Connect to the target tenant, rolling back to the previous one on failure. An exception
