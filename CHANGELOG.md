@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-16
+
 ### Fixed
 - When connecting failed with an error instead of an exit code, for example because UiRobot couldn't be started, the switch skipped the rollback and left the Robot disconnected and Assistant closed. Such errors now roll back to the previous tenant like a failed connect. A missing client secret is now found before the Robot is disconnected. ([#16](https://github.com/sorenbcoding/tenant-switcher-app/issues/16))
 - The credential check accepted any successful response, so a proxy or sign-in page could pass as valid credentials. It now requires an access token and doesn't follow redirects. Otherwise the card offers **Switch anyway**, as for an unreachable Identity Server. ([#17](https://github.com/sorenbcoding/tenant-switcher-app/issues/17))
